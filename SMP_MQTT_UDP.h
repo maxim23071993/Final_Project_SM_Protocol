@@ -26,10 +26,11 @@
 #define TIMEOUT     10000L
 /*###############################################*/
 //message queue defines and global variables
-#define MAX_TOPIC_PAYLOAD_SIZE 500
+#define MAX_PAYLOAD_SIZE 500
+#define MAX_TOPIC_SIZE 20
 struct sm_msg {
-    char topic[20];
-    char payload[MAX_TOPIC_PAYLOAD_SIZE];
+    char topic[MAX_TOPIC_SIZE];
+    char payload[MAX_PAYLOAD_SIZE];
 };
 int msqid_global;
 #define PERMS 0644
@@ -38,9 +39,14 @@ int msqid_global;
 #define PORT     8080
 #define MAXLINE 1024
 #define  MAX_UDP_PACKET 65500
-#define MAX_SM_MSG_ARR_SIZE    MAX_UDP_PACKET/(MAX_TOPIC_PAYLOAD_SIZE*2)
+#define MAX_SM_MSG_ARR_SIZE    MAX_UDP_PACKET/(MAX_TOPIC_PAYLOAD_SIZE + MAX_TOPIC_SIZE)
 int sockfd;
 struct sockaddr_in servaddr,cliaddr;
+struct sm_msg_dynamic
+{
+    char* topic;
+    char* payload;
+};
 struct sm_msg_arr{
     struct sm_msg arr[MAX_SM_MSG_ARR_SIZE];
     int arr_size;
