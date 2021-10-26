@@ -1,5 +1,5 @@
 //
-// Created by max on 24/08/2021.
+// Created by Maxim & Shlomi on 24/08/2021.
 //
 #include "SMP_MQTT_UDP.h"
 /*###############################################*/
@@ -47,11 +47,10 @@ void read_from_message_queue(struct sm_msg *message,int msqid){
         perror("msgrcv");
         exit(1);
     }
-    printf(" message queue recvd: %s : %s\n", message->topic,message->payload);
 }
 void msg_rcv_init(int* msqid){
     key_t key;
-    if ((key = ftok("msgq.txt", 'B')) == -1) {
+    if ((key = ftok("incapsulation_debug.txt", 'B')) == -1) {
         perror("ftok");
         exit(1);
     }
@@ -60,6 +59,31 @@ void msg_rcv_init(int* msqid){
         exit(1);
     }
     printf("message queue: ready to receive messages.\n");
+}
+struct sm_msg_arr* message_incapsulation()
+{
+
+    int rc;
+    int i=0;
+    struct msqid_ds buf;
+    int num_messages;
+    rc = msgctl(msqid_global, IPC_STAT, &buf);
+    num_messages = buf.msg_qnum;
+    //struct sm_msg msg;
+    struct sm_msg_arr* arr=(struct sm_msg_arr*)malloc(sizeof(struct sm_msg_arr));
+    arr->arr_size=0;
+
+
+    while(arr->arr_size<SM_MSG_MAX_ARR_SIZE && num_messages!=0)
+    {
+        read_from_message_queue(arr->msg_arr,msqid_global);
+
+        rc = msgctl(msqid_global, IPC_STAT, &buf);
+        num_messages = buf.msg_qnum;
+
+        arr->arr_size++;
+    }
+    return arr;
 }
 /*###############################################*/
 //udp
@@ -73,15 +97,14 @@ void udp_init_client()
     // Filling server information
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(PORT);
-    servaddr.sin_addr.s_addr =/*inet_addr("192.168.1.116"); //*/INADDR_ANY;
-    printf("UDP Socket created\n");
+    servaddr.sin_addr.s_addr =/*inet_addr("192.168.1.116");//*/INADDR_ANY;
+    printf("UDP Client Socket Created\n");
 }
-void* udp_send(struct sm_msg* message)
-        {
-    sendto(sockfd, message, sizeof(struct sm_msg),MSG_CONFIRM, (const struct sockaddr *) &servaddr,sizeof(servaddr));
-    printf("%s %s  sent over udp.\n",message->topic,message->payload);
+void* udp_send(struct sm_msg_arr* message)
+{
+    sendto(sockfd, message, sizeof(struct sm_msg_arr),MSG_CONFIRM, (const struct sockaddr *) &servaddr,sizeof(servaddr));
     return 0;
-        }
+}
 void udp_init_server()
 {
     if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
@@ -103,25 +126,25 @@ void udp_init_server()
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
+    printf("UDP Server Socket Created\n");
 }
 void* ACK_rcv(){
     int n, len;
     char buffer[MAXLINE];
     n = recvfrom(sockfd, (char *)buffer, MAXLINE,MSG_WAITALL, (struct sockaddr *) &servaddr,&len);
     buffer[n] = '\0';
-    printf("Server : %s\n", buffer);
+    printf("ACK from server : %s\n", buffer);
 }
-void udp_rcv_server(struct sm_msg *message)
+void udp_rcv_server(struct sm_msg_arr *message)
 {
     int len, n;
     len=sizeof(cliaddr);
-    n = recvfrom(sockfd, message,sizeof(struct sm_msg), MSG_WAITALL, ( struct sockaddr *) &cliaddr,&len);
-    printf("Client : %s  : %s",message->topic,message->payload);
+    n = recvfrom(sockfd, message,sizeof(struct sm_msg_arr), MSG_WAITALL, ( struct sockaddr *) &cliaddr,&len);
+    printf("Client ");
 }
 void ACK_send(char * ack){
     int len=sizeof(cliaddr);
-    sendto(sockfd, (const char *) ack, strlen(ack),
-           MSG_CONFIRM, (const struct sockaddr *) &cliaddr,
-           len);
-    printf(" ACK  %s message sent.\n",ack);
+    sendto(sockfd, (const char *) ack, strlen(ack),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,len);
+    printf(" ACK  %s message sent from server.\n",ack);
 }
+/*###############################################*/

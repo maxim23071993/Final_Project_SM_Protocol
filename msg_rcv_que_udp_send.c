@@ -1,13 +1,13 @@
 #include "SMP_MQTT_UDP.h"
 
     int main(int argc,char* argv[]){
-        struct sm_msg *message;
-        int *msqid;
-        message=(struct sm_msg*)malloc(sizeof(struct sm_msg));
+        struct sm_msg_arr *message;
+        int msqid;
+        message=(struct sm_msg_arr*)malloc(sizeof(struct sm_msg_arr));
         udp_init_client();
         msg_rcv_init(&msqid);
-        while(strcmp(message->payload,"close_sm")!=0){
-            read_from_message_queue(message,msqid);
+        while(1){
+            message=message_incapsulation();
             udp_send(message);
             ACK_rcv();
         }
