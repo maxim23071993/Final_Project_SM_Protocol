@@ -97,8 +97,9 @@ void udp_init_client()
     // Filling server information
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(PORT);
-    servaddr.sin_addr.s_addr =/*inet_addr("192.168.1.116");//*/INADDR_ANY;
-    printf("UDP Client Socket Created\n");
+    servaddr.sin_addr.s_addr = inet_addr(SERVER_IP);
+    RTT_init();
+    printf("UDP Socket created\n");
 }
 void* udp_send(struct sm_msg_arr* message)
 {
@@ -134,6 +135,8 @@ void* ACK_rcv(){
     n = recvfrom(sockfd, (char *)buffer, MAXLINE,MSG_WAITALL, (struct sockaddr *) &servaddr,&len);
     buffer[n] = '\0';
     printf("ACK from server : %s\n", buffer);
+    if(n==-1){return -1;}
+    else{return 1;}
 }
 void udp_rcv_server(struct sm_msg_arr *message)
 {
@@ -148,3 +151,47 @@ void ACK_send(char * ack){
     printf(" ACK  %s message sent from server.\n",ack);
 }
 /*###############################################*/
+//RTT and RTO estimation
+struct timeval t0;
+struct timeval t1;
+float timedifference_msec(struct timeval t0, struct timeval t1)
+{
+    return (t1.tv_sec - t0.tv_sec) * 1000.0f + (t1.tv_usec - t0.tv_usec) / 1000.0f;
+}
+void NETWORK_PARAMS_INIT(){
+        int num_of_try =0;
+        gettimeofday(&t0, 0);
+        sendto(sockfd, "RTT_INIT", sizeof("RTT_INIT"),MSG_CONFIRM, (const struct sockaddr *) &servaddr,sizeof(servaddr));
+        while(num_of_try<NUM_OF_TRY)
+        {
+            gettimeofday(&t1, 0);
+            if ((timedifference_msec(t0,t1) >=INIT_TIME_OUT) && (num_of_try <= NUM_OF_TRY) ) { // max timer val for retrunsmtion?? // num of trys?
+                t0=(struct timeval){0};
+                t1=(struct timeval){0};
+                sendto(sockfd, "RTT_INIT", sizeof("RTT_INIT"), MSG_CONFIRM, (const struct sockaddr *) &servaddr,sizeof(servaddr));
+                gettimeofday(&t0, 0);
+            }
+            if(ACK_rcv()== 1) {
+                gettimeofday(&t1, 0);
+                RTT = timedifference_msec(t0, t1);
+                RTO =  RTT+DELTA*RTT;
+                DEV=0;
+                printf("RTT was init to %f milliseconds.\n", RTT);
+                printf("RTO was init to %f milliseconds.\n", RTO);
+                return;
+            }
+            num_of_try++;
+        }
+
+    if(num_of_try ==NUM_OF_TRY){
+        printf("Failed to init RTT,server not respond!");
+        exit(1);
+    }
+
+    }
+void Update_Net_Params(float SAMPLE_RTT)
+{
+    RTT=ALPHA*RTT+(1-ALPHA)*SAMPLE_RTT;
+    DEV=DEV+BETA*(abs((SAMPLE_RTT-RTT))-DEV);
+    RTO=RTT+GAMMA*DEV;
+}
