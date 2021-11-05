@@ -60,34 +60,26 @@ void msg_rcv_init(int* msqid){
     }
     printf("message queue: ready to receive messages.\n");
 }
-struct sm_msg_arr* message_incapsulation()
+int message_encapsulation(struct sm_msg_arr *arr)
 {
-
     int rc;
-    int i=0;
     struct msqid_ds buf;
     int num_messages;
     rc = msgctl(msqid_global, IPC_STAT, &buf);
     num_messages = buf.msg_qnum;
-    //struct sm_msg msg;
-    struct sm_msg_arr* arr=(struct sm_msg_arr*)malloc(sizeof(struct sm_msg_arr));
+    if(num_messages==0)
+        return -1;
     arr->arr_size=0;
 
-
-    while(arr->arr_size<SM_MSG_MAX_ARR_SIZE && num_messages!=0)
+    while(arr->arr_size<SM_MSG_MAX_ARR_SIZE-1 && num_messages!=0)
     {
         read_from_message_queue(&arr->msg_arr[arr->arr_size],msqid_global);
-
         rc = msgctl(msqid_global, IPC_STAT, &buf);
         num_messages = buf.msg_qnum;
 
         arr->arr_size++;
-        if(arr->arr_size==150)
-        {
-            printf("");
-        }
     }
-    return arr;
+    return 1;
 }
 /*###############################################*/
 //udp

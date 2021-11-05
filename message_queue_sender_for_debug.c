@@ -10,7 +10,7 @@ int main()
     char payload[10];
     struct sm_msg msg;
     msg_que_create("incapsulation_debug");
-    for( i=0;i<200;i++)
+    for( i=0;i<100;i++)
     {
 
         message_queue_send("topic","payload");

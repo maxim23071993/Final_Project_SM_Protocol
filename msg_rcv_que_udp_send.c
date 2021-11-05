@@ -5,12 +5,14 @@
         struct sm_msg_arr *message;
         int msqid;
         message=(struct sm_msg_arr*)malloc(sizeof(struct sm_msg_arr));
-      // udp_init_client();
+        udp_init_client();
         msg_rcv_init(&msqid);
        while(1){
-            message=message_incapsulation();
-            udp_send(message);
-            ACK_rcv();
+           if(message_encapsulation(message)==1)
+           {
+               udp_send(message);
+               ACK_rcv();
+           }
         }
        /* free(message);
         printf("UDP: Close Socket.\n");

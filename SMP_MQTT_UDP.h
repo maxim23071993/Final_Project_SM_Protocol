@@ -36,8 +36,6 @@
 #define NUM_OF_TRY 10
 /*###############################################*/
 //RTT and RTO estimation defines and global variables
-
-
 #define NUM_OF_TRY 10
 #define INIT_TIME_OUT 1
 #define ALPHA 0.5
@@ -49,9 +47,6 @@ float RTO;
 float DEV;
 float RTT_SERVER;
 float RTO_SERVER;
-
-#define INIT_TIME_OUT 5
-
 /*###############################################*/
 //message queue defines and global variables
 #define MAX_PAYLOAD_SIZE 50
@@ -68,7 +63,7 @@ int msqid_global;
 #define MAXLINE 1024
 #define UDP_THROUPUT 100000 //100 kbps
 #define MAX_UDP_PACKET (UDP_THROUPUT/8)
-#define SM_MSG_MAX_ARR_SIZE 500//(MAX_UDP_PACKET/70)
+#define SM_MSG_MAX_ARR_SIZE (MAX_UDP_PACKET/70)
 
 int sockfd;
 struct sockaddr_in servaddr,cliaddr;
@@ -84,7 +79,7 @@ void msg_que_create(char *topic);
 void message_queue_send( char *msg_payload,char * topic);
 void msg_rcv_init(int* msqid);
 void read_from_message_queue(struct sm_msg *message,int msqid);
-struct sm_msg_arr* message_incapsulation();
+int message_encapsulation(struct sm_msg_arr *arr);
 /*###############################################*/
 //UDP functions
 int NETWORK_PARAMS_INIT();
