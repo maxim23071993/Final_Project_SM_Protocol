@@ -3,6 +3,7 @@
 //
 #ifndef MQTT_CLIENTS_SMP_MQTT_UDP_H
 #define MQTT_CLIENTS_SMP_MQTT_UDP_H
+#include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,6 +20,8 @@
 #include <sys/time.h>
 #include <sys/select.h>
 
+
+
 /*###############################################*/
 
 /*###############################################*/
@@ -29,12 +32,14 @@
 #define PAYLOAD     "Hello World!"
 #define QOS         1
 #define TIMEOUT     10000L
-#define SERVER_IP "192.168.1.116"
+#define SERVER_IP "192.168.1.112"
 #define NUM_OF_TRY 10
 /*###############################################*/
 //RTT and RTO estimation defines and global variables
 
-#define INIT_TIME_OUT 1000
+
+#define NUM_OF_TRY 10
+#define INIT_TIME_OUT 1
 #define ALPHA 0.5
 #define BETA 0.5
 #define GAMMA 0.5
@@ -42,7 +47,10 @@
 float RTT;
 float RTO;
 float DEV;
+float RTT_SERVER;
+float RTO_SERVER;
 
+#define INIT_TIME_OUT 5
 
 /*###############################################*/
 //message queue defines and global variables
@@ -60,7 +68,7 @@ int msqid_global;
 #define MAXLINE 1024
 #define UDP_THROUPUT 100000 //100 kbps
 #define MAX_UDP_PACKET (UDP_THROUPUT/8)
-#define SM_MSG_MAX_ARR_SIZE (MAX_UDP_PACKET/70)
+#define SM_MSG_MAX_ARR_SIZE 500//(MAX_UDP_PACKET/70)
 
 int sockfd;
 struct sockaddr_in servaddr,cliaddr;
@@ -79,15 +87,14 @@ void read_from_message_queue(struct sm_msg *message,int msqid);
 struct sm_msg_arr* message_incapsulation();
 /*###############################################*/
 //UDP functions
-void NETWORK_PARAMS_INIT();
+int NETWORK_PARAMS_INIT();
 void Update_Net_Params(float SAMPLE_RTT);
 void udp_init_client();
 void* udp_send(struct sm_msg_arr* message);
 void* ACK_rcv();
-void udp_init_server();
+int udp_init_server();
 void udp_rcv_server(struct sm_msg_arr *message);
 void ACK_send(char * ack);
-
-
+int RTT_init_respond();
 /*###############################################*/
 #endif //MQTT_CLIENTS_SMP_MQTT_UDP_H

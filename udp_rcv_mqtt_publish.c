@@ -50,19 +50,19 @@ int main()
 
     char * ack={"server ack"};
     struct sm_msg_arr  message;
+    int j=0;
     //message.msg_arr=(struct sm_msg *)malloc(sizeof(struct sm_msg));
-
-
-
     //message=(struct sm_msg *)malloc(sizeof(struct sm_msg));
     udp_init_server();
     while(1)
     {
-        udp_rcv_server(&message);
-        ACK_send(ack);
+        printf("\n############################   %d   ####################################\n",j);
+    udp_rcv_server(&message);
+       ACK_send(ack);
         for(int i=0;i< message.arr_size;i++)
-            printf("\n%s %s \n",message.msg_arr[i].topic,message.msg_arr[i].payload);
+           printf("\n%s %s \n",message.msg_arr[i].topic,message.msg_arr[i].payload);
         //mqtt_publish(message);
+        j++;
     }
     return 0;
 }
