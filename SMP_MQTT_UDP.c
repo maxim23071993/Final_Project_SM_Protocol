@@ -2,7 +2,7 @@
 // Created by Maxim & Shlomi on 24/08/2021.
 //
 #include "SMP_MQTT_UDP.h"
-/*###############################################*/
+/*####################################################################################################################*/
 //message queu
 void msg_que_create(char *topic)
 {
@@ -81,57 +81,94 @@ int message_encapsulation(struct sm_msg_arr *arr)
     }
     return 1;
 }
-/*###############################################*/
+/*####################################################################################################################*/
 //udp
-void udp_init_client()
+void client_sockets_creation()
 {
-    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
-        perror("socket creation failed");
+    if ((client_receive_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+    {
+        perror("socket creation failed!");
+        exit(EXIT_FAILURE);
+    }
+
+
+    memset(&cliaddr, 0, sizeof(cliaddr));
+
+    //Filling server information
+    cliaddr.sin_family = AF_INET; // IPv4
+    cliaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr(SERVER_IP);
+    cliaddr.sin_port = htons(RECEIVE_PORT);
+
+
+    // Bind the socket with the server address
+    if (bind(client_receive_socket, (const struct sockaddr *) &cliaddr, sizeof(cliaddr)) < 0)
+    {
+        perror("bind failed");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("UDP receive socket created\n");
+
+    if ((client_send_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+    {
+        perror("socket creation failed!");
         exit(EXIT_FAILURE);
     }
     memset(&servaddr, 0, sizeof(servaddr));
-    // Filling server information
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(PORT);
-    servaddr.sin_addr.s_addr = INADDR_ANY;
-    NETWORK_PARAMS_INIT();
-    printf("UDP Socket created\n");
-}
+    //Filling server information
+    servaddr.sin_family = AF_INET; // IPv4
+    servaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr(SERVER_IP);
+    servaddr.sin_port = htons(SEND_PORT);
+    printf("UDP send socket created\n");
 
-in_addr_tinet_addr( char *string) {
-    return 0;
 }
-void* udp_send(struct sm_msg_arr* message)
+void udp_init_client()
 {
-    sendto(sockfd, message, sizeof(struct sm_msg_arr),MSG_CONFIRM, (const struct sockaddr *) &servaddr,sizeof(servaddr));
-    return 0;
+    client_sockets_creation();
+    NETWORK_PARAMS_INIT();
 }
-int udp_init_server()
+void server_sockets_creation()
 {
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    if ((server_receive_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+    {
         perror("socket creation failed!");
         exit(EXIT_FAILURE);
     }
 
     memset(&servaddr, 0, sizeof(servaddr));
-    memset(&cliaddr, 0, sizeof(cliaddr));
+
 
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = INADDR_ANY;
-    //servaddr.sin_addr.s_addr = inet_addr(SERVER_IP);
-    servaddr.sin_port = htons(PORT);
+    servaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr(SERVER_IP);
+    servaddr.sin_port = htons(RECEIVE_PORT);
 
     // Bind the socket with the server address
-    if (bind(sockfd, (const struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
+    if (bind(server_receive_socket, (const struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
+    printf("UDP receive socket created\n");
+
+    if ((server_send_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+    {
+        perror("socket creation failed!");
+        exit(EXIT_FAILURE);
+    }
+    memset(&cliaddr, 0, sizeof(cliaddr));
+    cliaddr.sin_family = AF_INET; // IPv4
+    cliaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr(SERVER_IP);
+    cliaddr.sin_port = htons(RECEIVE_PORT);
+    printf("UDP send socket created\n");
+
+}
+int udp_init_server()
+{
     RTT_init_respond();
 }
-void* ACK_rcv(){
 
-    //int c_len=sizeof(cliaddr);
+void* ACK_rcv()
+{
     int s_len=sizeof(servaddr);
     int n;
     char buffer[MAXLINE];
@@ -150,22 +187,14 @@ void* ACK_rcv(){
     }
     else{return -1;}
 }
-void udp_rcv_server(struct sm_msg_arr *message)
-{
-    int c_len=sizeof(cliaddr);
-    int  n;
-    n = recvfrom(sockfd, message,sizeof(struct sm_msg_arr), MSG_WAITALL, ( struct sockaddr *) &cliaddr,  c_len);
-    printf("Client ");
-}
+
 void ACK_send(char * ack){
     int len=sizeof(cliaddr);
     sendto(sockfd, (const char *) ack, strlen(ack),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,len);
     printf(" ACK  %s message sent from server.\n",ack);
 }
-/*###############################################*/
+/*####################################################################################################################*/
 //RTT and RTO estimation
-struct timeval t0;
-struct timeval t1;
 float timedifference_msec(struct timeval t0, struct timeval t1)
 {
     return (t1.tv_sec - t0.tv_sec) * 1000.0f + (t1.tv_usec - t0.tv_usec) / 1000.0f;
@@ -181,7 +210,7 @@ int NETWORK_PARAMS_INIT(){
     while(num_of_try<NUM_OF_TRY)
     {
         gettimeofday(&t1, 0);
-        if ((timedifference_msec(t0,t1) >=INIT_TIME_OUT) && (num_of_try <= NUM_OF_TRY) ) { // max timer val for retrunsmtion?? // num of trys?
+        if ((timedifference_msec(t0,t1) >=INIT_TIME_OUT) && (num_of_try <= NUM_OF_TRY) ) { // max timer val for retransmtion?? // num of trys?
             t0=(struct timeval){0};
             t1=(struct timeval){0};
             printf("\nif get in\n");

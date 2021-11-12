@@ -12,10 +12,7 @@ int main()
     msg_que_create("incapsulation_debug");
     for( i=0;i<100;i++)
     {
-
         message_queue_send("topic","payload");
     }
-
-
     return 0;
 }

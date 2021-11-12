@@ -19,12 +19,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/select.h>
-
-
-
-/*###############################################*/
-
-/*###############################################*/
+/*####################################################################################################################*/
 //MQTT defines and global variables
 #define ADDRESS     "tcp://localhost:1883"
 #define CLIENTID    "ExampleClientSub"
@@ -34,7 +29,7 @@
 #define TIMEOUT     10000L
 #define SERVER_IP "192.168.1.112"
 #define NUM_OF_TRY 10
-/*###############################################*/
+/*####################################################################################################################*/
 //RTT and RTO estimation defines and global variables
 #define NUM_OF_TRY 10
 #define INIT_TIME_OUT 1
@@ -42,12 +37,14 @@
 #define BETA 0.5
 #define GAMMA 0.5
 #define DELTA 0.1
+struct timeval t0;
+struct timeval t1;
 float RTT;
 float RTO;
 float DEV;
 float RTT_SERVER;
 float RTO_SERVER;
-/*###############################################*/
+/*####################################################################################################################*/
 //message queue defines and global variables
 #define MAX_PAYLOAD_SIZE 50
 #define MAX_TOPIC_SIZE 20
@@ -57,15 +54,18 @@ struct sm_msg {
 };
 int msqid_global;
 #define PERMS 0644
-/*###############################################*/
+/*####################################################################################################################*/
 //UDP defines and global variables
-#define PORT     8080
+#define SEND_PORT     8080
+#define RECEIVE_PORT  8081
 #define MAXLINE 1024
-#define UDP_THROUPUT 100000 //100 kbps
-#define MAX_UDP_PACKET (UDP_THROUPUT/8)
+#define UDP_BANDWIDTH 100000 //100 kbps
+#define MAX_UDP_PACKET (UDP_BANDWIDTH/8)
 #define SM_MSG_MAX_ARR_SIZE (MAX_UDP_PACKET/70)
-
-int sockfd;
+int client_send_socket;
+int client_receive_socket;
+int server_send_socket;
+int server_receive_socket;
 struct sockaddr_in servaddr,cliaddr;
 
 struct sm_msg_arr{
@@ -73,17 +73,18 @@ struct sm_msg_arr{
     int arr_size;
     int sq_number;
 };
-/*###############################################*/
+/*####################################################################################################################*/
 //message queue functions
 void msg_que_create(char *topic);
 void message_queue_send( char *msg_payload,char * topic);
 void msg_rcv_init(int* msqid);
 void read_from_message_queue(struct sm_msg *message,int msqid);
 int message_encapsulation(struct sm_msg_arr *arr);
-/*###############################################*/
+/*####################################################################################################################*/
 //UDP functions
+void client_sockets_creation();
+void server_sockets_creation();
 int NETWORK_PARAMS_INIT();
-void Update_Net_Params(float SAMPLE_RTT);
 void udp_init_client();
 void* udp_send(struct sm_msg_arr* message);
 void* ACK_rcv();
@@ -91,5 +92,5 @@ int udp_init_server();
 void udp_rcv_server(struct sm_msg_arr *message);
 void ACK_send(char * ack);
 int RTT_init_respond();
-/*###############################################*/
+/*####################################################################################################################*/
 #endif //MQTT_CLIENTS_SMP_MQTT_UDP_H
