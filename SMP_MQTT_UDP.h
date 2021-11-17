@@ -77,7 +77,7 @@ void msg_que_create(char *topic);
 void message_queue_send( char *msg_payload,char * topic);
 void msg_rcv_init(int* msqid);
 void read_from_message_queue(struct sm_msg *message,int msqid);
-void message_encapsulation(struct sm_msg_arr arr[],int arr_size,int sqe_number);
+void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_number);
 /*####################################################################################################################*/
 //UDP functions
 void client_sockets_creation();
