@@ -85,7 +85,7 @@ int message_encapsulation(struct sm_msg_arr *arr)
 //udp
 void client_sockets_creation()
 {
-   if ((client_receive_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+   if ((client_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
     {
         perror("socket creation failed!");
         exit(EXIT_FAILURE);
@@ -100,7 +100,7 @@ void client_sockets_creation()
 
     // Bind the socket with the server address
     //if (bind(client_receive_socket, (const struct sockaddr *) &cliaddr, sizeof(cliaddr)) < 0)
-    if (bind(client_receive_socket, (const struct sockaddr *) &cliaddr, sizeof(cliaddr)) < 0)
+    if (bind(client_socket, (const struct sockaddr *) &cliaddr, sizeof(cliaddr)) < 0)
 
     {
         perror("bind failed");
@@ -109,11 +109,6 @@ void client_sockets_creation()
 
     printf("UDP receive socket created\n");
 
-    if ((client_send_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-    {
-        perror("socket creation failed!");
-        exit(EXIT_FAILURE);
-    }
     memset(&servaddr, 0, sizeof(servaddr));
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
@@ -129,7 +124,7 @@ void udp_init_client()
 }
 void server_sockets_creation()
 {
-    if ((server_receive_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+    if ((server_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
     {
         perror("socket creation failed!");
         exit(EXIT_FAILURE);
@@ -140,24 +135,20 @@ void server_sockets_creation()
 
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr(SERVER_IP);
+    servaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr("192.168.1.117");
     servaddr.sin_port = htons(SERVER_PORT);
 
     // Bind the socket with the server address
-    if (bind(server_receive_socket, (const struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
+    if (bind(server_socket, (const struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
     printf("UDP receive socket created\n");
 
-    if ((server_send_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-    {
-        perror("socket creation failed!");
-        exit(EXIT_FAILURE);
-    }
+
     memset(&cliaddr, 0, sizeof(cliaddr));
     cliaddr.sin_family = AF_INET; // IPv4
-    cliaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr(SERVER_IP);
+    cliaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr("192.168.1.108");
     cliaddr.sin_port = htons(CLIENT_PORT);
     printf("UDP send socket created\n");
 
@@ -180,7 +171,7 @@ int ACK_rcv()
     //setsockopt(client_receive_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
 
    // n = recvfrom(client_receive_socket, (char *)buffer, MAXLINE,SO_RCVTIMEO, (struct sockaddr *) &servaddr,&s_len);
-    n = recvfrom(client_receive_socket, (char *)buffer, MAXLINE,MSG_WAITALL, (struct sockaddr *) &servaddr,&s_len);
+    n = recvfrom(client_socket, (char *)buffer, MAXLINE,MSG_WAITALL, (struct sockaddr *) &servaddr,&s_len);
 
 
     if(n!=-1)
@@ -193,7 +184,7 @@ int ACK_rcv()
 
 void ACK_send(char * ack){
     int len=sizeof(cliaddr);
-    sendto(server_send_socket, (const char *) ack, strlen(ack),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,len);
+    sendto(server_socket, (const char *) ack, strlen(ack),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,len);
     printf(" ACK  %s message sent from server.\n",ack);
 }
 /*####################################################################################################################*/
@@ -209,7 +200,7 @@ int NETWORK_PARAMS_INIT(){
     char msg[10];
 
     gettimeofday(&t0, 0);
-    sendto(client_send_socket, "RTT_INIT", sizeof("RTT_INIT"),MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
+    sendto(client_socket, "RTT_INIT", sizeof("RTT_INIT"),MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
     while(num_of_try<NUM_OF_TRY)
     {
         gettimeofday(&t1, 0);
@@ -217,7 +208,7 @@ int NETWORK_PARAMS_INIT(){
             t0=(struct timeval){0};
             t1=(struct timeval){0};
             printf("\nif get in\n");
-            sendto(client_send_socket, "RTT_INIT", sizeof("RTT_INIT"), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
+            sendto(client_socket, "RTT_INIT", sizeof("RTT_INIT"), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
             gettimeofday(&t0, 0);
         }
         n=ACK_rcv();
@@ -230,7 +221,7 @@ int NETWORK_PARAMS_INIT(){
             printf("RTO was init to %f milliseconds.\n", RTO);
             printf("Updating server...\n");
             for(int i=0;i<NUM_OF_TRY;i++) {
-                sendto(client_send_socket, &RTT, sizeof(RTT), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
+                sendto(client_socket, &RTT, sizeof(RTT), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
                 k = ACK_rcv();
                 if (k != -1) { return(1); }
             }
@@ -255,17 +246,14 @@ int RTT_init_respond() {
     char RTT_init_msg[20];
 
     while (n == -1) {
-        n = recvfrom(server_receive_socket, RTT_init_msg, sizeof(RTT_init_msg), MSG_WAITALL, (struct sockaddr *) &cliaddr, &c_len);
+        n = recvfrom(server_socket, RTT_init_msg, sizeof(RTT_init_msg), MSG_WAITALL, (struct sockaddr *) &cliaddr, &c_len);
         if (n != -1) {
             printf("\n RTT_INIT msg receive from clint\n");
-            sendto(server_send_socket, (const char *) RTT_ack, sizeof(RTT_ack), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,
-                   c_len);
+            sendto(server_socket, (const char *) RTT_ack, sizeof(RTT_ack), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
             printf("%s message sent.\n", RTT_ack);
-            k = recvfrom(server_receive_socket, &RTT_SERVER, sizeof(RTT_SERVER), MSG_WAITALL, (struct sockaddr *) &cliaddr,
-                         &c_len);
+            k = recvfrom(server_socket, &RTT_SERVER, sizeof(RTT_SERVER), MSG_WAITALL, (struct sockaddr *) &cliaddr,&c_len);
             if (k != -1) { printf("RTT_SERVER was init to %f millisecond...\n", RTT_SERVER); }
-            sendto(server_send_socket, (const char *) RTT_ack, sizeof(RTT_ack), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,
-                   c_len);
+            sendto(server_socket, (const char *) RTT_ack, sizeof(RTT_ack), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
             return (1);
         }
     }

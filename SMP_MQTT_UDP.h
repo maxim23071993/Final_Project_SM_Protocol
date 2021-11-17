@@ -57,18 +57,15 @@ int msqid_global;
 /*####################################################################################################################*/
 //UDP defines and global variables
 #define CLIENT_PORT  8080
-#define SERVER_PORT  8086
+#define SERVER_PORT  8081
 
 #define MAXLINE 1024
 #define UDP_BANDWIDTH 100000 //100 kbps
 #define MAX_UDP_PACKET (UDP_BANDWIDTH/8)
 #define SM_MSG_MAX_ARR_SIZE (MAX_UDP_PACKET/70)
-int client_send_socket;
-int client_receive_socket;
-int server_send_socket;
-int server_receive_socket;
-//int receive_socket;
-//int send_socket;
+int client_socket;
+int server_socket;
+
 struct sockaddr_in servaddr,cliaddr;
 
 struct sm_msg_arr{
