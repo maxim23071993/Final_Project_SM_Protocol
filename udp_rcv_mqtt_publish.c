@@ -57,7 +57,7 @@ int main()
     while(1)
     {
        printf("\n############################   %d   ####################################\n",j);
-       udp_rcv_server(&message);
+       //udp_rcv_server(&message);
        ACK_send(ack);
         for(int i=0;i< message.arr_size;i++)
            printf("\n%s %s \n",message.msg_arr[i].topic,message.msg_arr[i].payload);

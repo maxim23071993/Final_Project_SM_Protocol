@@ -56,8 +56,9 @@ int msqid_global;
 #define PERMS 0644
 /*####################################################################################################################*/
 //UDP defines and global variables
-#define SEND_PORT     8080
-#define RECEIVE_PORT  8081
+#define CLIENT_PORT  8080
+#define SERVER_PORT  8086
+
 #define MAXLINE 1024
 #define UDP_BANDWIDTH 100000 //100 kbps
 #define MAX_UDP_PACKET (UDP_BANDWIDTH/8)
@@ -66,6 +67,8 @@ int client_send_socket;
 int client_receive_socket;
 int server_send_socket;
 int server_receive_socket;
+//int receive_socket;
+//int send_socket;
 struct sockaddr_in servaddr,cliaddr;
 
 struct sm_msg_arr{
@@ -87,7 +90,7 @@ void server_sockets_creation();
 int NETWORK_PARAMS_INIT();
 void udp_init_client();
 void* udp_send(struct sm_msg_arr* message);
-void* ACK_rcv();
+int ACK_rcv();
 int udp_init_server();
 void udp_rcv_server(struct sm_msg_arr *message);
 void ACK_send(char * ack);

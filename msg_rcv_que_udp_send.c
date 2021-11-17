@@ -2,6 +2,8 @@
 
     int main(int argc,char* argv[])
     {
+        int c_len = sizeof(cliaddr);
+        int s_len = sizeof(servaddr);
         struct sm_msg_arr *message;
         int msqid;
         message=(struct sm_msg_arr*)malloc(sizeof(struct sm_msg_arr));
@@ -10,7 +12,8 @@
        while(1){
            if(message_encapsulation(message)==1)
            {
-               udp_send(message);
+               //udp_send(message);
+               sendto(client_send_socket, (const char *)message, sizeof(message), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
                ACK_rcv();
            }
         }
