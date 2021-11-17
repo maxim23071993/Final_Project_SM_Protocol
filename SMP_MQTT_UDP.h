@@ -58,16 +58,14 @@ int msqid_global;
 //UDP defines and global variables
 #define CLIENT_PORT  8080
 #define SERVER_PORT  8081
-
 #define MAXLINE 1024
 #define UDP_BANDWIDTH 100000 //100 kbps
 #define MAX_UDP_PACKET (UDP_BANDWIDTH/8)
 #define SM_MSG_MAX_ARR_SIZE (MAX_UDP_PACKET/70)
+int WINDOW_CONTROL[SM_MSG_MAX_ARR_SIZE];//(-1)-not sent yet,0-need to be sent,1-sent and waiting to ack
 int client_socket;
 int server_socket;
-
 struct sockaddr_in servaddr,cliaddr;
-
 struct sm_msg_arr{
     struct sm_msg  msg_arr[SM_MSG_MAX_ARR_SIZE];
     int arr_size;
@@ -79,7 +77,7 @@ void msg_que_create(char *topic);
 void message_queue_send( char *msg_payload,char * topic);
 void msg_rcv_init(int* msqid);
 void read_from_message_queue(struct sm_msg *message,int msqid);
-int message_encapsulation(struct sm_msg_arr *arr);
+void message_encapsulation(struct sm_msg_arr arr[],int arr_size,int sqe_number);
 /*####################################################################################################################*/
 //UDP functions
 void client_sockets_creation();

@@ -60,26 +60,34 @@ void msg_rcv_init(int* msqid){
     }
     printf("message queue: ready to receive messages.\n");
 }
-int message_encapsulation(struct sm_msg_arr *arr)
+void message_encapsulation(struct sm_msg_arr arr[],int arr_size,int sqe_number)
 {
     int rc;
     struct msqid_ds buf;
-    int num_messages;
+    struct sm_msg message;
+    /*int num_messages;
     rc = msgctl(msqid_global, IPC_STAT, &buf);
-    num_messages = buf.msg_qnum;
-    if(num_messages==0)
-        return -1;
-    arr->arr_size=0;
-
-    while(arr->arr_size<SM_MSG_MAX_ARR_SIZE-1 && num_messages!=0)
+    num_messages = buf.msg_qnum;*/
+    while(1)
     {
-        read_from_message_queue(&arr->msg_arr[arr->arr_size],msqid_global);
-        rc = msgctl(msqid_global, IPC_STAT, &buf);
-        num_messages = buf.msg_qnum;
+        read_from_message_queue(&message,msqid_global);
+        switch(strcmp("SMP SYS MSG",message.topic))
+        {
+            case 0:
+                WINDOW_CONTROL[atoi(message.payload)]=0;
+                WINDOW_CONTROL[sqe_number]=0;
+                return;
 
-        arr->arr_size++;
+                // operator doesn't match any case constant +, -, *, /
+            default:
+              strcpy(arr[sqe_number].msg_arr[arr_size].payload,message.payload);
+              strcpy(arr[sqe_number].msg_arr[arr_size].topic,message.topic);
+              arr[sqe_number].arr_size++;
+              if((arr[sqe_number].arr_size)==10)
+                  return;
+
+        }
     }
-    return 1;
 }
 /*####################################################################################################################*/
 //udp
@@ -158,7 +166,6 @@ int udp_init_server()
     server_sockets_creation();
     RTT_init_respond();
 }
-
 int ACK_rcv()
 {
     int s_len=sizeof(servaddr);
@@ -181,7 +188,6 @@ int ACK_rcv()
     }
     else{return -1;}
 }
-
 void ACK_send(char * ack){
     int len=sizeof(cliaddr);
     sendto(server_socket, (const char *) ack, strlen(ack),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,len);

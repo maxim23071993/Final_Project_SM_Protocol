@@ -2,20 +2,22 @@
 
     int main(int argc,char* argv[])
     {
-        int c_len = sizeof(cliaddr);
-        int s_len = sizeof(servaddr);
-        struct sm_msg_arr *message;
+        struct sm_msg_arr data[10];
         int msqid;
-        message=(struct sm_msg_arr*)malloc(sizeof(struct sm_msg_arr));
-        udp_init_client();
+        int s_len=sizeof(servaddr);
+        int c_len=sizeof(cliaddr);
+
         msg_rcv_init(&msqid);
-       while(1){
-           if(message_encapsulation(message)==1)
-           {
+        udp_init_client();
+       while(1)
+       {
+           message_encapsulation(data,10,0);
+
                //udp_send(message);
-               sendto(client_send_socket, (const char *)message, sizeof(message), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
+              // for(int i=0;i<1;i++)
+               sendto(client_socket, (const char *)data, sizeof(struct sm_msg_arr), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
                ACK_rcv();
-           }
+
         }
        /* free(message);
         printf("UDP: Close Socket.\n");
