@@ -63,15 +63,19 @@ void msg_rcv_init(int* msqid){
 void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_number)
 {
     int rc;
+    int msqid;
     struct msqid_ds buf;
     struct sm_msg message;
+    int message_compare;
+    char string[]={"SMP SYS MSG"};
     /*int num_messages;
     rc = msgctl(msqid_global, IPC_STAT, &buf);
     num_messages = buf.msg_qnum;*/
-    while(strcmp("SMP SYS MSG",message.topic))
+    while(1)
     {
         read_from_message_queue(&message,msqid_global);
-        switch(strcmp("SMP SYS MSG",message.topic))
+        message_compare=strcmp(string,message.topic);
+        switch(message_compare)
         {
             case 0:
                 WINDOW_CONTROL[atoi(message.payload)]=0;
@@ -82,11 +86,11 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
             default:
               strcpy(arr[sqe_number].msg_arr[arr[sqe_number].arr_size].payload,message.payload);
               strcpy(arr[sqe_number].msg_arr[arr[sqe_number].arr_size].topic,message.topic);
-              arr[sqe_number].arr_size++;
+                (arr[sqe_number].arr_size)++;
               if((arr[sqe_number].arr_size)==10)
-                  return;
-
+                return;
         }
+
     }
 }
 /*####################################################################################################################*/
