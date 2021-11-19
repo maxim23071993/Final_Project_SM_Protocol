@@ -88,7 +88,7 @@ void* udp_send(struct sm_msg_arr* message);
 int ACK_rcv();
 int udp_init_server();
 void udp_rcv_server(struct sm_msg_arr *message);
-void ACK_send(char * ack);
+void ACK_send(int * ack_sqe);
 int RTT_init_respond();
 /*####################################################################################################################*/
 //Thread routine

@@ -192,10 +192,10 @@ int ACK_rcv()
     }
     else{return -1;}
 }
-void ACK_send(char * ack){
+void ACK_send(int * ack_sqe){
     int len=sizeof(cliaddr);
-    sendto(server_socket, (const char *) ack, strlen(ack),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,len);
-    printf(" ACK  %s message sent from server.\n",ack);
+    sendto(server_socket,  ack_sqe, sizeof(int),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,len);
+    printf(" ACK  %s message sent from server for packet nober :.\n",ack_sqe);
 }
 /*####################################################################################################################*/
 //RTT and RTO estimation

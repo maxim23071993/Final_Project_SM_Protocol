@@ -49,7 +49,6 @@ int main()
 {
     int s_len=sizeof(servaddr);
     int c_len=sizeof(cliaddr);
-    char * ack={"server ack"};
     struct sm_msg_arr  message;
     int j=0;
     //message.msg_arr=(struct sm_msg *)malloc(sizeof(struct sm_msg));
@@ -59,7 +58,7 @@ int main()
     {
        printf("\n############################   %d   ####################################\n",j);
        recvfrom(server_socket, &message, sizeof(struct sm_msg_arr), MSG_WAITALL, (struct sockaddr *) &cliaddr, &c_len);
-       ACK_send(ack);
+       ACK_send(&message.sq_number);
         for(int i=0;i< message.arr_size;i++)
            printf("\n%s %s \n",message.msg_arr[i].topic,message.msg_arr[i].payload);
         //mqtt_publish(message);
