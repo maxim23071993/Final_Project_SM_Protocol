@@ -91,4 +91,7 @@ void udp_rcv_server(struct sm_msg_arr *message);
 void ACK_send(char * ack);
 int RTT_init_respond();
 /*####################################################################################################################*/
+//Thread routine
+void * sender_routine();
+void * receiver_routine();
 #endif //MQTT_CLIENTS_SMP_MQTT_UDP_H

@@ -268,3 +268,28 @@ int RTT_init_respond() {
         }
     }
 }
+/*####################################################################################################################*/
+//Thread routine
+void * sender_routine()
+{
+    int s_len=sizeof(servaddr);
+    int c_len=sizeof(cliaddr);
+    struct sm_msg_arr arr[10];
+    arr[0].arr_size=0;
+    arr[0].sq_number=0;
+    message_encapsulation(&arr,10,1);
+
+    //udp_send(message);
+    // for(int i=0;i<1;i++)
+    sendto(client_socket, arr, sizeof(struct sm_msg_arr), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
+    /* free(message);
+        printf("UDP: Close Socket.\n");
+        close(sockfd);
+        printf("message queue: done receiving messages.\n");
+        system("rm msgq.txt");*/
+}
+void * receiver_routine()
+{
+    ACK_rcv();
+
+}
