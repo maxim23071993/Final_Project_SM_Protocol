@@ -44,6 +44,7 @@ float RTO;
 float DEV;
 float RTT_SERVER;
 float RTO_SERVER;
+float sampled_rtt;
 /*####################################################################################################################*/
 //message queue defines and global variables
 #define MAX_PAYLOAD_SIZE 50
@@ -62,15 +63,23 @@ int msqid_global;
 #define UDP_BANDWIDTH 100000 //100 kbps
 #define MAX_UDP_PACKET (UDP_BANDWIDTH/8)
 #define SM_MSG_MAX_ARR_SIZE (MAX_UDP_PACKET/70)
-int WINDOW_CONTROL[SM_MSG_MAX_ARR_SIZE];//(-1)-not sent yet,0-need to be sent,1-sent and waiting to ack
 int client_socket;
 int server_socket;
+int window_size;
+
 struct sockaddr_in servaddr,cliaddr;
 struct sm_msg_arr{
     struct sm_msg  msg_arr[SM_MSG_MAX_ARR_SIZE];
     int arr_size;
     int sq_number;
 };
+struct window_control{
+    int seq_num;
+    int status; //(-1)-not sent yet,0-need to be sent,1-sent and waiting to ack
+    struct timeval t;
+
+};
+struct window_control windowcontrol[SM_MSG_MAX_ARR_SIZE];
 /*####################################################################################################################*/
 //message queue functions
 void msg_que_create(char *topic);
@@ -90,8 +99,12 @@ int udp_init_server();
 void udp_rcv_server(struct sm_msg_arr *message);
 void ACK_send(int * ack_sqe);
 int RTT_init_respond();
+void Update_Net_Params(float SAMPLE_RTT);
+
 /*####################################################################################################################*/
 //Thread routine
 void * sender_routine();
 void * receiver_routine();
+
+
 #endif //MQTT_CLIENTS_SMP_MQTT_UDP_H
