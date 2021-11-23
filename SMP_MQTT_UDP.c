@@ -174,6 +174,7 @@ int ACK_rcv()
 {
     int s_len=sizeof(servaddr);
     int n;
+    float sampled_rtt;
     char buffer[MAXLINE];
     struct timeval tv;
     tv.tv_sec = INIT_TIME_OUT;
@@ -268,9 +269,17 @@ int RTT_init_respond() {
         }
     }
 }
+void Update_Net_Params(float SAMPLE_RTT)
+{
+    RTT=ALPHA*RTT+(1-ALPHA)*SAMPLE_RTT;
+    DEV=DEV+BETA*(abs((SAMPLE_RTT-RTT))-DEV);
+    RTO=RTT+GAMMA*DEV;
+}
+
+
 /*####################################################################################################################*/
 //Thread routine
-void * sender_routine()
+void * sender_routine(void* arg)
 {
     int s_len=sizeof(servaddr);
     int c_len=sizeof(cliaddr);
@@ -288,8 +297,52 @@ void * sender_routine()
         printf("message queue: done receiving messages.\n");
         system("rm msgq.txt");*/
 }
-void * receiver_routine()
-{
-    ACK_rcv();
+void * receiver_routine(struct timeval t0) {
+    // adding mutex when accsess to windwodcontrol array.
+    int n;
+    int s_len = sizeof(servaddr);
+    struct timeval tv;
+    int *ack_seq;
+    int msqid_global;
+    pthread_mutex_t lock;
 
+    float max_t = 0, time_diff = 0;
+    char buf[10];
+    t1 = (struct timeval) {0};
+    //gettimeofday(&t1, 0);
+    pthread_mutex_lock(&lock);
+    for (int i = 0; i < SM_MSG_MAX_ARR_SIZE; i++) {
+        gettimeofday(&t1, 0);
+        time_diff = timedifference_msec(windowcontrol[i].t, t1);
+        if (time_diff > max_t) {
+            max_t = time_diff;
+        }
+        if (time_diff >= RTO && windowcontrol[i].status == 1) {
+            printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
+            windowcontrol[i].status = 0;
+            sprintf(buf, "%d", windowcontrol[i].seq_num);
+            message_queue_send("SMP SYS MSG", buf);
+            printf("DEBUG: SMP SYS MSG was sent to sender thread\n");
+        }
+    }
+    tv.tv_sec = max_t;
+    tv.tv_usec = 0;
+    setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv,sizeof tv); // for non-blocking recvfrom calling
+    n = recvfrom(client_socket, ack_seq, sizeof(ack_seq), SO_RCVTIMEO, (struct sockaddr *) &servaddr, &s_len);
+    if (n != -1) {
+        windowcontrol[*ack_seq].status = -1;
+        gettimeofday(&t1, 0);
+        sampled_rtt = timedifference_msec(windowcontrol[*ack_seq].t, t1);
+        Update_Net_Params(sampled_rtt);
+
+    }
+    pthread_mutex_unlock(&lock);
+}
+
+int Circular_seq_num(int previus_seq)
+{
+        int num,i;
+
+            num = (previus_seq + 1) % (window_size + 1);
+            return num;
 }
