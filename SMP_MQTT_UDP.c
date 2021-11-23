@@ -78,8 +78,8 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
         switch(message_compare)
         {
             case 0:
-                WINDOW_CONTROL[atoi(message.payload)]=0;
-                WINDOW_CONTROL[sqe_number]=0;
+                windowcontrol[atoi(message.payload)].status=0;
+                //windowcontrol[sqe_number]=0;
                 return;
 
                 // operator doesn't match any case constant +, -, *, /
@@ -285,12 +285,18 @@ void * sender_routine(void* arg)
     int c_len=sizeof(cliaddr);
     struct sm_msg_arr arr[10];
     arr[0].arr_size=0;
-    arr[0].sq_number=0;
+    arr[0].sq_number=1;
     message_encapsulation(&arr,10,1);
+    gettimeofday(arg, 0);
 
     //udp_send(message);
     // for(int i=0;i<1;i++)
     sendto(client_socket, arr, sizeof(struct sm_msg_arr), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
+    windowcontrol[0].status=1;
+    gettimeofday(&(windowcontrol[0].t), 0);
+    windowcontrol[0].seq_num=1;
+
+
     /* free(message);
         printf("UDP: Close Socket.\n");
         close(sockfd);
