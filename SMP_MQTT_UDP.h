@@ -54,6 +54,7 @@ struct sm_msg {
     char payload[MAX_PAYLOAD_SIZE];
 };
 int msqid_global;
+pthread_mutex_t lock;
 #define PERMS 0644
 /*####################################################################################################################*/
 //UDP defines and global variables
