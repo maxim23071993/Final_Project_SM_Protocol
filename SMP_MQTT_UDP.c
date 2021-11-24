@@ -290,6 +290,9 @@ void * sender_routine(void* arg)
     {
         message_encapsulation((struct sm_msg_arr *)&arr, 10, i);
         gettimeofday(arg, 0);
+
+        pthread_mutex_lock(&lock);
+
         for(int j=0;j<SM_MSG_MAX_ARR_SIZE;j++) {
             if(windowcontrol[j].status==0)
 
@@ -298,6 +301,7 @@ void * sender_routine(void* arg)
             gettimeofday(&(windowcontrol[j].t), 0);
             windowcontrol[j].seq_num = 1;
         }
+        pthread_mutex_unlock(&lock);
     }
 
     /* free(message);
