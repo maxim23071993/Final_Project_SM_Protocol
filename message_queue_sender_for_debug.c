@@ -18,6 +18,6 @@ int main()
     {
         message_queue_send("topic","payload");
     }
-    message_encapsulation(arr,10,0);
+   // message_encapsulation(arr,10,0);
     return 0;
 }

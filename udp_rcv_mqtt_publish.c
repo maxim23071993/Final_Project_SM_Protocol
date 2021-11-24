@@ -62,7 +62,8 @@ int main()
         sendto(server_socket,&message.sq_number, sizeof(int),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
         printf("ACK on message seq %d was sent to client\n",message.sq_number);
         for(int i=0;i< message.arr_size;i++)
-           printf("\n%s %s \n",message.msg_arr[i].topic,message.msg_arr[i].payload);
+            printf("%s %s \n",message.msg_arr[i].topic,message.msg_arr[i].payload);
+        j++;
         //mqtt_publish(message);
 
     }

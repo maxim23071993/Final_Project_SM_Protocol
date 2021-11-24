@@ -78,18 +78,29 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
         switch(message_compare)
         {
             case 0:
+                pthread_mutex_lock(&lock);
+
                 windowcontrol[atoi(message.payload)].status=0;
                 //windowcontrol[sqe_number]=0;
+
+                pthread_mutex_unlock(&lock);
+
                 return;
 
                 // operator doesn't match any case constant +, -, *, /
             default:
               strcpy(arr[sqe_number].msg_arr[arr[sqe_number].arr_size].payload,message.payload);
               strcpy(arr[sqe_number].msg_arr[arr[sqe_number].arr_size].topic,message.topic);
-                (arr[sqe_number].arr_size)++;
-              if((arr[sqe_number].arr_size)==data_arr_size)
-                  arr->sq_number=sqe_number;
-                return;
+                (arr->arr_size)++;
+              if((arr->arr_size)==data_arr_size) {
+                  arr->sq_number = sqe_number;
+                  pthread_mutex_lock(&lock);
+                    windowcontrol[sqe_number].status=0;
+                  pthread_mutex_unlock(&lock);
+
+
+                  return;
+              }
         }
 
     }
@@ -322,7 +333,7 @@ void * receiver_routine(struct timeval t0) {
     char buf[10];
     t1 = (struct timeval) {0};
     //gettimeofday(&t1, 0);
-    while (1) {
+  /*  while (1) {
         pthread_mutex_lock(&lock);
         for (int i = 0; i < SM_MSG_MAX_ARR_SIZE; i++) {
             gettimeofday(&t1, 0);
@@ -335,7 +346,7 @@ void * receiver_routine(struct timeval t0) {
                     printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
                     windowcontrol[i].status = 0;
                     sprintf(buf, "%d", windowcontrol[i].seq_num);
-                    message_queue_send("SMP SYS MSG", buf);
+                   // message_queue_send("SMP SYS MSG", buf);
                     printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
                 }
             }
@@ -360,7 +371,7 @@ void * receiver_routine(struct timeval t0) {
             pthread_mutex_unlock(&lock);
 
         }
-    }
+    }*/
 }
 
 int Circular_seq_num(int previus_seq)
