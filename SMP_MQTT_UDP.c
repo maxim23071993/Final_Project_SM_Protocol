@@ -286,12 +286,12 @@ void * sender_routine(void* arg)
     struct sm_msg_arr arr[10];
     arr[0].arr_size=0;
     arr[0].sq_number=1;
-    message_encapsulation(&arr,10,1);
+    message_encapsulation(&arr,10,0);
     gettimeofday(arg, 0);
 
     //udp_send(message);
     // for(int i=0;i<1;i++)
-    sendto(client_socket, &arr[1], sizeof(struct sm_msg_arr), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
+    sendto(client_socket, &arr[0], sizeof(struct sm_msg_arr), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
     windowcontrol[0].status=1;
     gettimeofday(&(windowcontrol[0].t), 0);
     windowcontrol[0].seq_num=1;
@@ -308,7 +308,7 @@ void * receiver_routine(struct timeval t0) {
     int n;
     int s_len = sizeof(servaddr);
     struct timeval tv;
-    int ack_seq;
+    int ack_seq=1;
     float min_t = 0, time_diff = 0;
     char buf[10];
     t1 = (struct timeval) {0};
