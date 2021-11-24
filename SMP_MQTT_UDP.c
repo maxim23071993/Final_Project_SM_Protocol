@@ -89,8 +89,8 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
 
                 // operator doesn't match any case constant +, -, *, /
             default:
-              strcpy(arr[sqe_number].msg_arr[arr[sqe_number].arr_size].payload,message.payload);
-              strcpy(arr[sqe_number].msg_arr[arr[sqe_number].arr_size].topic,message.topic);
+              strcpy(arr->msg_arr[arr->arr_size].payload,message.payload);
+              strcpy(arr->msg_arr[arr->arr_size].topic,message.topic);
                 (arr->arr_size)++;
               if((arr->arr_size)==data_arr_size) {
                   arr->sq_number = sqe_number;
