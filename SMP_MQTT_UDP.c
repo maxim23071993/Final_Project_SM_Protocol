@@ -288,18 +288,20 @@ void * sender_routine(void* arg)
 
     for(int i=0;i<10;i++)
     {
-        message_encapsulation((struct sm_msg_arr *)&arr, 10, i);
+        message_encapsulation((struct sm_msg_arr *)&arr[i], 10, i);
         gettimeofday(arg, 0);
 
         pthread_mutex_lock(&lock);
 
-        for(int j=0;j<SM_MSG_MAX_ARR_SIZE;j++) {
+        for(int j=0;j<SM_MSG_MAX_ARR_SIZE;j++)
+        {
             if(windowcontrol[j].status==0)
-
-            sendto(client_socket, &arr[j], sizeof(struct sm_msg_arr), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
-            windowcontrol[j].status = 1;
-            gettimeofday(&(windowcontrol[j].t), 0);
-            windowcontrol[j].seq_num = 1;
+            {
+                sendto(client_socket, &arr[j], sizeof(struct sm_msg_arr), MSG_CONFIRM,(const struct sockaddr *) &servaddr, s_len);
+                windowcontrol[j].status = 1;
+                gettimeofday(&(windowcontrol[j].t), 0);
+                windowcontrol[j].seq_num = 1;
+            }
         }
         pthread_mutex_unlock(&lock);
     }
@@ -338,24 +340,26 @@ void * receiver_routine(struct timeval t0) {
                 }
             }
         }
+        pthread_mutex_unlock(&lock);
         tv.tv_sec = min_t;
         tv.tv_usec = 0;
-        setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv,
-                   sizeof tv); // for non-blocking recvfrom calling
-       // n = recvfrom(client_socket, ack_seq, sizeof(ack_seq), SO_RCVTIMEO, (struct sockaddr *) &servaddr, &s_len);
+        setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv,sizeof tv); // for non-blocking recvfrom calling
         n = recvfrom(client_socket, &ack_seq, MAXLINE,SO_RCVTIMEO, (struct sockaddr *) &servaddr,&s_len);
         if (n != -1) {
             printf("ACK seq number received: %d\n",ack_seq);
             gettimeofday(&t1, 0);
+
+            pthread_mutex_lock(&lock);
+
             sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, t1);
             Update_Net_Params(sampled_rtt);
 
             windowcontrol[ack_seq].status = -1;
             windowcontrol[ack_seq].seq_num = -1;
             windowcontrol[ack_seq].t.tv_sec = 0;
+            pthread_mutex_unlock(&lock);
 
         }
-        pthread_mutex_unlock(&lock);
     }
 }
 
