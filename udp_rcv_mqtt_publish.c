@@ -58,7 +58,9 @@ int main()
     {
        printf("\n############################   %d   ####################################\n",j);
        recvfrom(server_socket, &message, sizeof(struct sm_msg_arr), MSG_WAITALL, (struct sockaddr *) &cliaddr, &c_len);
-       ACK_send(&message.sq_number);
+       //ACK_send(&message.sq_number);
+       sendto(server_socket, &message.sq_number, sizeof(struct sm_msg_arr), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
+
         for(int i=0;i< message.arr_size;i++)
            printf("\n%s %s \n",message.msg_arr[i].topic,message.msg_arr[i].payload);
         //mqtt_publish(message);

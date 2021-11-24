@@ -192,6 +192,9 @@ int ACK_rcv()
         return 1;
     }
     else{return -1;}
+
+
+
 }
 void ACK_send(int * ack_sqe){
     int len=sizeof(cliaddr);
@@ -291,7 +294,7 @@ void * sender_routine(void* arg)
 
     //udp_send(message);
     // for(int i=0;i<1;i++)
-    sendto(client_socket, arr, sizeof(struct sm_msg_arr), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
+    sendto(client_socket, &arr[1], sizeof(struct sm_msg_arr), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
     windowcontrol[0].status=1;
     gettimeofday(&(windowcontrol[0].t), 0);
     windowcontrol[0].seq_num=1;
@@ -308,7 +311,7 @@ void * receiver_routine(struct timeval t0) {
     int n;
     int s_len = sizeof(servaddr);
     struct timeval tv;
-    int *ack_seq;
+    int ack_seq;
     float min_t = 0, time_diff = 0;
     char buf[10];
     t1 = (struct timeval) {0};
@@ -331,18 +334,18 @@ void * receiver_routine(struct timeval t0) {
         }
         tv.tv_sec = min_t;
         tv.tv_usec = 0;
-        setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv,
-                   sizeof tv); // for non-blocking recvfrom calling
-        n = recvfrom(client_socket, ack_seq, sizeof(ack_seq), SO_RCVTIMEO, (struct sockaddr *) &servaddr, &s_len);
+        //setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv, sizeof tv); // for non-blocking recvfrom calling
+        n = recvfrom(client_socket, &ack_seq, sizeof(ack_seq), MSG_WAITALL, (struct sockaddr *) &servaddr, &s_len);
+      // ACK_rcv();
         if (n != -1) {
 
             gettimeofday(&t1, 0);
-            sampled_rtt = timedifference_msec(windowcontrol[*ack_seq].t, t1);
+            sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, t1);
             Update_Net_Params(sampled_rtt);
 
-            windowcontrol[*ack_seq].status = -1;
-            windowcontrol[*ack_seq].seq_num = -1;
-            windowcontrol[*ack_seq].t.tv_sec = 0;
+            windowcontrol[ack_seq].status = -1;
+            windowcontrol[ack_seq].seq_num = -1;
+            windowcontrol[ack_seq].t.tv_sec = 0;
 
         }
         pthread_mutex_unlock(&lock);
