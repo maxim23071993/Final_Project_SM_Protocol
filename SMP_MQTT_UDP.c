@@ -192,9 +192,6 @@ int ACK_rcv()
         return 1;
     }
     else{return -1;}
-
-
-
 }
 void ACK_send(int * ack_sqe){
     int len=sizeof(cliaddr);
@@ -320,25 +317,28 @@ void * receiver_routine(struct timeval t0) {
         pthread_mutex_lock(&lock);
         for (int i = 0; i < SM_MSG_MAX_ARR_SIZE; i++) {
             gettimeofday(&t1, 0);
-            time_diff = timedifference_msec(windowcontrol[i].t, t1);
-            if (time_diff < min_t) {
-                min_t = time_diff;
-            }
-            if (time_diff >= RTO && windowcontrol[i].status == 1) {
-                printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
-                windowcontrol[i].status = 0;
-                sprintf(buf, "%d", windowcontrol[i].seq_num);
-                message_queue_send("SMP SYS MSG", buf);
-                printf("DEBUG: SMP SYS MSG was sent to sender thread\n");
+            if (windowcontrol[i].seq_num != -1) {
+                time_diff = timedifference_msec(windowcontrol[i].t, t1);
+                if (time_diff < min_t) {
+                    min_t = time_diff;
+                }
+                if (time_diff >= RTO && windowcontrol[i].status == 1) {
+                    printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
+                    windowcontrol[i].status = 0;
+                    sprintf(buf, "%d", windowcontrol[i].seq_num);
+                    message_queue_send("SMP SYS MSG", buf);
+                    printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
+                }
             }
         }
         tv.tv_sec = min_t;
         tv.tv_usec = 0;
-        //setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv, sizeof tv); // for non-blocking recvfrom calling
-        n = recvfrom(client_socket, &ack_seq, sizeof(ack_seq), MSG_WAITALL, (struct sockaddr *) &servaddr, &s_len);
-      // ACK_rcv();
+        setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv,
+                   sizeof tv); // for non-blocking recvfrom calling
+       // n = recvfrom(client_socket, ack_seq, sizeof(ack_seq), SO_RCVTIMEO, (struct sockaddr *) &servaddr, &s_len);
+        n = recvfrom(client_socket, &ack_seq, MAXLINE,SO_RCVTIMEO, (struct sockaddr *) &servaddr,&s_len);
         if (n != -1) {
-
+            printf("ACK seq number received: %d\n",&ack_seq);
             gettimeofday(&t1, 0);
             sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, t1);
             Update_Net_Params(sampled_rtt);
