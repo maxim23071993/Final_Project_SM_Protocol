@@ -62,9 +62,9 @@ void msg_rcv_init(int* msqid){
 }
 void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_number)
 {
-    int rc;
+    /*int rc;
     int msqid;
-    struct msqid_ds buf;
+    struct msqid_ds buf;*/
     struct sm_msg message;
     int message_compare;
     char string[]={"SMP SYS MSG"};
@@ -87,7 +87,8 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
               strcpy(arr[sqe_number].msg_arr[arr[sqe_number].arr_size].payload,message.payload);
               strcpy(arr[sqe_number].msg_arr[arr[sqe_number].arr_size].topic,message.topic);
                 (arr[sqe_number].arr_size)++;
-              if((arr[sqe_number].arr_size)==10)
+              if((arr[sqe_number].arr_size)==data_arr_size)
+                  arr->sq_number=sqe_number;
                 return;
         }
 
@@ -174,7 +175,7 @@ int ACK_rcv()
 {
     int s_len=sizeof(servaddr);
     int n;
-    float sampled_rtt;
+    //float sampled_rtt;
     char buffer[MAXLINE];
     struct timeval tv;
     tv.tv_sec = INIT_TIME_OUT;
@@ -196,7 +197,7 @@ int ACK_rcv()
 void ACK_send(int * ack_sqe){
     int len=sizeof(cliaddr);
     sendto(server_socket,  ack_sqe, sizeof(int),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,len);
-    printf(" ACK  %s message sent from server for packet nober :.\n",ack_sqe);
+    printf(" ACK  %d message sent from server for packet nober :.\n",*ack_sqe);
 }
 /*####################################################################################################################*/
 //RTT and RTO estimation
@@ -284,18 +285,20 @@ void * sender_routine(void* arg)
     int s_len=sizeof(servaddr);
     int c_len=sizeof(cliaddr);
     struct sm_msg_arr arr[10];
-    arr[0].arr_size=0;
-    arr[0].sq_number=1;
-    message_encapsulation(&arr,10,0);
-    gettimeofday(arg, 0);
 
-    //udp_send(message);
-    // for(int i=0;i<1;i++)
-    sendto(client_socket, &arr[0], sizeof(struct sm_msg_arr), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
-    windowcontrol[0].status=1;
-    gettimeofday(&(windowcontrol[0].t), 0);
-    windowcontrol[0].seq_num=1;
+    for(int i=0;i<10;i++)
+    {
+        message_encapsulation((struct sm_msg_arr *)&arr, 10, i);
+        gettimeofday(arg, 0);
+        for(int j=0;j<SM_MSG_MAX_ARR_SIZE;j++) {
+            if(windowcontrol[j].status==0)
 
+            sendto(client_socket, &arr[j], sizeof(struct sm_msg_arr), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
+            windowcontrol[j].status = 1;
+            gettimeofday(&(windowcontrol[j].t), 0);
+            windowcontrol[j].seq_num = 1;
+        }
+    }
 
     /* free(message);
         printf("UDP: Close Socket.\n");
@@ -338,7 +341,7 @@ void * receiver_routine(struct timeval t0) {
        // n = recvfrom(client_socket, ack_seq, sizeof(ack_seq), SO_RCVTIMEO, (struct sockaddr *) &servaddr, &s_len);
         n = recvfrom(client_socket, &ack_seq, MAXLINE,SO_RCVTIMEO, (struct sockaddr *) &servaddr,&s_len);
         if (n != -1) {
-            printf("ACK seq number received: %d\n",&ack_seq);
+            printf("ACK seq number received: %d\n",ack_seq);
             gettimeofday(&t1, 0);
             sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, t1);
             Update_Net_Params(sampled_rtt);
@@ -354,7 +357,7 @@ void * receiver_routine(struct timeval t0) {
 
 int Circular_seq_num(int previus_seq)
 {
-        int num,i;
+        int num;
 
             num = (previus_seq + 1) % (window_size + 1);
             return num;
