@@ -19,6 +19,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/select.h>
+#include <arpa/inet.h>
 /*####################################################################################################################*/
 //MQTT defines and global variables
 #define ADDRESS     "tcp://localhost:1883"
@@ -27,7 +28,10 @@
 #define PAYLOAD     "Hello World!"
 #define QOS         1
 #define TIMEOUT     10000L
-#define SERVER_IP "192.168.1.112"
+#define SERVER_IP "192.168.1.117"
+#define CLIENT_IP "192.168.1.113"
+
+
 #define NUM_OF_TRY 10
 /*####################################################################################################################*/
 //RTT and RTO estimation defines and global variables

@@ -118,7 +118,7 @@ void client_sockets_creation()
 
     //Filling server information
     cliaddr.sin_family = AF_INET; // IPv4
-    cliaddr.sin_addr.s_addr = INADDR_ANY;
+    cliaddr.sin_addr.s_addr = inet_addr(CLIENT_IP);//INADDR_ANY;
     cliaddr.sin_port = htons(CLIENT_PORT);
 
 
@@ -136,7 +136,7 @@ void client_sockets_creation()
     memset(&servaddr, 0, sizeof(servaddr));
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr(SERVER_IP);
+    servaddr.sin_addr.s_addr = inet_addr(SERVER_IP);;//INADDR_ANY;//inet_addr(SERVER_IP);
     servaddr.sin_port = htons(SERVER_PORT);
     printf("UDP send socket created\n");
 
@@ -295,9 +295,9 @@ void * sender_routine(void* arg)
 {
     int s_len=sizeof(servaddr);
     int c_len=sizeof(cliaddr);
-    struct sm_msg_arr arr[10];
+    struct sm_msg_arr arr[100];
 
-    for(int i=0;i<10;i++)
+    for(int i=0;i<100;i++)
     {
         message_encapsulation((struct sm_msg_arr *)&arr[i], 10, i);
         gettimeofday(arg, 0);
@@ -311,7 +311,7 @@ void * sender_routine(void* arg)
                 sendto(client_socket, &arr[j], sizeof(struct sm_msg_arr), MSG_CONFIRM,(const struct sockaddr *) &servaddr, s_len);
                 windowcontrol[j].status = 1;
                 gettimeofday(&(windowcontrol[j].t), 0);
-                windowcontrol[j].seq_num = 1;
+                //windowcontrol[j].seq_num = 1;
             }
         }
         pthread_mutex_unlock(&lock);
@@ -324,16 +324,16 @@ void * sender_routine(void* arg)
         system("rm msgq.txt");*/
 }
 void * receiver_routine(struct timeval t0) {
-    // adding mutex when accsess to windwodcontrol array.
     int n;
     int s_len = sizeof(servaddr);
     struct timeval tv;
     int ack_seq=1;
+    float t;
     float min_t = 0, time_diff = 0;
     char buf[10];
     t1 = (struct timeval) {0};
     //gettimeofday(&t1, 0);
-  /*  while (1) {
+   while (1) {
         pthread_mutex_lock(&lock);
         for (int i = 0; i < SM_MSG_MAX_ARR_SIZE; i++) {
             gettimeofday(&t1, 0);
@@ -344,7 +344,9 @@ void * receiver_routine(struct timeval t0) {
                 }
                 if (time_diff >= RTO && windowcontrol[i].status == 1) {
                     printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
+                    printf("Time diff:%f, RTO:%f, RTT:%f\n",time_diff,RTO,RTT);
                     windowcontrol[i].status = 0;
+                    windowcontrol[i].t.tv_sec=0;
                     sprintf(buf, "%d", windowcontrol[i].seq_num);
                    // message_queue_send("SMP SYS MSG", buf);
                     printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
@@ -363,21 +365,15 @@ void * receiver_routine(struct timeval t0) {
             pthread_mutex_lock(&lock);
 
             sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, t1);
+            printf("RTT sample: %f, RTT:%f,RTO:%f\n",sampled_rtt,RTT,RTO);
             Update_Net_Params(sampled_rtt);
 
             windowcontrol[ack_seq].status = -1;
             windowcontrol[ack_seq].seq_num = -1;
-            windowcontrol[ack_seq].t.tv_sec = 0;
+            windowcontrol[ack_seq].t.tv_sec = -1;
             pthread_mutex_unlock(&lock);
 
         }
-    }*/
+    }
 }
 
-int Circular_seq_num(int previus_seq)
-{
-        int num;
-
-            num = (previus_seq + 1) % (window_size + 1);
-            return num;
-}
