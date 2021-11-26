@@ -13,10 +13,10 @@
             windowcontrol[i].status=-1;
             windowcontrol[i].seq_num=-1;
         }
-        pthread_create(&sender_thread,NULL,&sender_routine,&t0);
-        pthread_create(&receiver_thread,NULL,&receiver_routine,&t0);
-        pthread_join(&sender_thread,NULL);
-        pthread_join(&receiver_thread,NULL);
+        pthread_create((pthread_t *)&sender_thread,NULL,(void *)&sender_routine,&t0);
+        pthread_create((pthread_t *)&receiver_thread,NULL,(void *)&receiver_routine,&t0);
+        pthread_join(sender_thread,NULL);
+        pthread_join(receiver_thread,NULL);
 
         while ( ( c = getchar() ) != EOF );
         return 0;

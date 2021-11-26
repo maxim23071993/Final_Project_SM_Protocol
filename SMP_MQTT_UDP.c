@@ -60,7 +60,7 @@ void msg_rcv_init(int* msqid){
     }
     printf("message queue: ready to receive messages.\n");
 }
-void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_number)
+void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_number,int * sqe_send_arr)
 {
     /*int rc;
     int msqid;
@@ -71,6 +71,8 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
     /*int num_messages;
     rc = msgctl(msqid_global, IPC_STAT, &buf);
     num_messages = buf.msg_qnum;*/
+    sqe_send_arr[0]=-1;
+    sqe_send_arr[1]=-1;
     while(1)
     {
         read_from_message_queue(&message,msqid_global);
@@ -78,13 +80,7 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
         switch(message_compare)
         {
             case 0:
-                pthread_mutex_lock(&lock);
-
-                windowcontrol[atoi(message.payload)].status=0;
-                //windowcontrol[sqe_number]=0;
-
-                pthread_mutex_unlock(&lock);
-
+                sqe_send_arr[0]=atoi(message.payload);
                 return;
 
                 // operator doesn't match any case constant +, -, *, /
@@ -94,11 +90,7 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
                 (arr->arr_size)++;
               if((arr->arr_size)==data_arr_size) {
                   arr->sq_number = sqe_number;
-                  pthread_mutex_lock(&lock);
-                    windowcontrol[sqe_number].status=0;
-                  pthread_mutex_unlock(&lock);
-
-
+                  sqe_send_arr[1]=sqe_number;
                   return;
               }
         }
@@ -159,7 +151,7 @@ void server_sockets_creation()
 
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr("192.168.1.117");
+    servaddr.sin_addr.s_addr = /*INADDR_ANY;*/inet_addr("192.168.1.117");
     servaddr.sin_port = htons(SERVER_PORT);
 
     // Bind the socket with the server address
@@ -172,7 +164,7 @@ void server_sockets_creation()
 
     memset(&cliaddr, 0, sizeof(cliaddr));
     cliaddr.sin_family = AF_INET; // IPv4
-    cliaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr("192.168.1.108");
+    cliaddr.sin_addr.s_addr = /*INADDR_ANY;*/inet_addr("192.168.1.113");
     cliaddr.sin_port = htons(CLIENT_PORT);
     printf("UDP send socket created\n");
 
@@ -210,7 +202,6 @@ void ACK_send(int * ack_sqe){
     sendto(server_socket,  ack_sqe, sizeof(int),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,len);
     printf(" ACK  %d message sent from server for packet nober :.\n",*ack_sqe);
 }
-/*####################################################################################################################*/
 //RTT and RTO estimation
 float timedifference_msec(struct timeval t0, struct timeval t1)
 {
@@ -287,7 +278,15 @@ void Update_Net_Params(float SAMPLE_RTT)
     DEV=DEV+BETA*(abs((SAMPLE_RTT-RTT))-DEV);
     RTO=RTT+GAMMA*DEV;
 }
+void sequence_number_select(int * previous_sqe)
+{
+    if(*previous_sqe==SM_MSG_MAX_ARR_SIZE)
+        *previous_sqe=-1;
+    while(windowcontrol[*previous_sqe+1].status!=(-1))
+        usleep(TIME_TO_WAIT_FOR_WINDOW);
+    (*previous_sqe)++;
 
+}
 
 /*####################################################################################################################*/
 //Thread routine
@@ -295,29 +294,33 @@ void * sender_routine(void* arg)
 {
     int s_len=sizeof(servaddr);
     int c_len=sizeof(cliaddr);
+    int sequence_number=(-1);
+    int sqe_sender_arr[2];
     struct sm_msg_arr arr[10];
 
-    for(int i=0;i<10;i++)
+    while(1)
     {
-        message_encapsulation((struct sm_msg_arr *)&arr[i], 10, i);
+        sequence_number_select(&sequence_number);
+        message_encapsulation((struct sm_msg_arr *)&arr[sequence_number], 10, sequence_number,sqe_sender_arr);
+
         gettimeofday(arg, 0);
 
         pthread_mutex_lock(&lock);
 
-        for(int j=0;j<SM_MSG_MAX_ARR_SIZE;j++)
+        for(int i=0;i<2;i++)
         {
-            if(windowcontrol[j].status==0)
+            if(sqe_sender_arr[i]!=(-1))
+            if(windowcontrol[sqe_sender_arr[i]].status==0)
             {
-                sendto(client_socket, &arr[j], sizeof(struct sm_msg_arr), MSG_CONFIRM,(const struct sockaddr *) &servaddr, s_len);
-                windowcontrol[j].status = 1;
-                gettimeofday(&(windowcontrol[j].t), 0);
-                windowcontrol[j].seq_num = 1;
+                sendto(client_socket, &arr[sqe_sender_arr[i]], sizeof(struct sm_msg_arr), MSG_CONFIRM,(const struct sockaddr *) &servaddr, s_len);
+                windowcontrol[sqe_sender_arr[i]].status = 1;
+                gettimeofday(&(windowcontrol[sqe_sender_arr[i]].t), 0);
             }
         }
         pthread_mutex_unlock(&lock);
     }
 
-    /* free(message);
+    /*
         printf("UDP: Close Socket.\n");
         close(sockfd);
         printf("message queue: done receiving messages.\n");
@@ -333,12 +336,12 @@ void * receiver_routine(struct timeval t0) {
     char buf[10];
     t1 = (struct timeval) {0};
     //gettimeofday(&t1, 0);
-  /*  while (1) {
+   while (1) {
         pthread_mutex_lock(&lock);
         for (int i = 0; i < SM_MSG_MAX_ARR_SIZE; i++) {
             gettimeofday(&t1, 0);
             if (windowcontrol[i].seq_num != -1) {
-                time_diff = timedifference_msec(windowcontrol[i].t, t1);
+                time_diff = timedifference_msec(windowcontrol[i].t, t1)/100;
                 if (time_diff < min_t) {
                     min_t = time_diff;
                 }
@@ -371,13 +374,6 @@ void * receiver_routine(struct timeval t0) {
             pthread_mutex_unlock(&lock);
 
         }
-    }*/
+    }
 }
 
-int Circular_seq_num(int previus_seq)
-{
-        int num;
-
-            num = (previus_seq + 1) % (window_size + 1);
-            return num;
-}

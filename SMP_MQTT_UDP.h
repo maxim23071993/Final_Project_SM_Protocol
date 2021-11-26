@@ -5,6 +5,7 @@
 #define MQTT_CLIENTS_SMP_MQTT_UDP_H
 #include <sys/wait.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -19,6 +20,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/select.h>
+#include <arpa/inet.h>
 /*####################################################################################################################*/
 //MQTT defines and global variables
 #define ADDRESS     "tcp://localhost:1883"
@@ -64,21 +66,23 @@ pthread_mutex_t lock;
 #define UDP_BANDWIDTH 100000 //100 kbps
 #define MAX_UDP_PACKET (UDP_BANDWIDTH/8)
 #define SM_MSG_MAX_ARR_SIZE (MAX_UDP_PACKET/70)
+#define TIME_TO_WAIT_FOR_WINDOW 100 //100 useconds
 int client_socket;
 int server_socket;
 int window_size;
 
 struct sockaddr_in servaddr,cliaddr;
+
 struct sm_msg_arr{
     struct sm_msg  msg_arr[SM_MSG_MAX_ARR_SIZE];
     int arr_size;
     int sq_number;
 };
+
 struct window_control{
     int seq_num;
     int status; //(-1)-not sent yet,0-need to be sent,1-sent and waiting to ack
     struct timeval t;
-
 };
 struct window_control windowcontrol[SM_MSG_MAX_ARR_SIZE];
 /*####################################################################################################################*/
@@ -87,7 +91,7 @@ void msg_que_create(char *topic);
 void message_queue_send( char *msg_payload,char * topic);
 void msg_rcv_init(int* msqid);
 void read_from_message_queue(struct sm_msg *message,int msqid);
-void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_number);
+void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_number,int * sqe_send_arr);
 /*####################################################################################################################*/
 //UDP functions
 void client_sockets_creation();
@@ -101,7 +105,7 @@ void udp_rcv_server(struct sm_msg_arr *message);
 void ACK_send(int * ack_sqe);
 int RTT_init_respond();
 void Update_Net_Params(float SAMPLE_RTT);
-
+void sequence_number_select(int * previous_sqe);
 /*####################################################################################################################*/
 //Thread routine
 void * sender_routine();
