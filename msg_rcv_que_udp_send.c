@@ -12,6 +12,7 @@
         {
             windowcontrol[i].status=-1;
             windowcontrol[i].seq_num=-1;
+
         }
         pthread_create((pthread_t *)&sender_thread,NULL,(void *)&sender_routine,&t0);
         pthread_create((pthread_t *)&receiver_thread,NULL,(void *)&receiver_routine,&t0);
