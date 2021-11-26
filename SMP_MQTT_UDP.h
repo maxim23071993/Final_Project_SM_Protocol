@@ -87,7 +87,7 @@ struct window_control{
     int status; //(-1)-not sent yet,0-need to be sent,1-sent and waiting to ack
     struct timeval t;
 };
-struct window_control windowcontrol[SM_MSG_MAX_ARR_SIZE];
+struct window_control windowcontrol[10];
 /*####################################################################################################################*/
 //message queue functions
 void msg_que_create(char *topic);

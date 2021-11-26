@@ -110,7 +110,7 @@ void client_sockets_creation()
 
     //Filling server information
     cliaddr.sin_family = AF_INET; // IPv4
-    cliaddr.sin_addr.s_addr = inet_addr(CLIENT_IP);//INADDR_ANY;
+    cliaddr.sin_addr.s_addr = /*inet_addr(CLIENT_IP);*/INADDR_ANY;
     cliaddr.sin_port = htons(CLIENT_PORT);
 
 
@@ -128,7 +128,7 @@ void client_sockets_creation()
     memset(&servaddr, 0, sizeof(servaddr));
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = inet_addr(SERVER_IP);;//INADDR_ANY;//inet_addr(SERVER_IP);
+    servaddr.sin_addr.s_addr = /*inet_addr(SERVER_IP);;*/INADDR_ANY;//inet_addr(SERVER_IP);
     servaddr.sin_port = htons(SERVER_PORT);
     printf("UDP send socket created\n");
 
@@ -151,7 +151,7 @@ void server_sockets_creation()
 
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = /*INADDR_ANY;*/inet_addr("192.168.1.117");
+    servaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr("192.168.1.117");
     servaddr.sin_port = htons(SERVER_PORT);
 
     // Bind the socket with the server address
@@ -164,7 +164,7 @@ void server_sockets_creation()
 
     memset(&cliaddr, 0, sizeof(cliaddr));
     cliaddr.sin_family = AF_INET; // IPv4
-    cliaddr.sin_addr.s_addr = /*INADDR_ANY;*/inet_addr("192.168.1.113");
+    cliaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr("192.168.1.113");
     cliaddr.sin_port = htons(CLIENT_PORT);
     printf("UDP send socket created\n");
 
@@ -310,7 +310,7 @@ void * sender_routine(void* arg)
         for(int i=0;i<2;i++)
         {
             if(sqe_sender_arr[i]!=(-1))
-            if(windowcontrol[sqe_sender_arr[i]].status==0)
+           // if(windowcontrol[sqe_sender_arr[i]].status==0)
             {
                 sendto(client_socket, &arr[sqe_sender_arr[i]], sizeof(struct sm_msg_arr), MSG_CONFIRM,(const struct sockaddr *) &servaddr, s_len);
                 windowcontrol[sqe_sender_arr[i]].status = 1;
@@ -338,7 +338,7 @@ void * receiver_routine(struct timeval t0) {
     //gettimeofday(&t1, 0);
    while (1) {
         pthread_mutex_lock(&lock);
-        for (int i = 0; i < SM_MSG_MAX_ARR_SIZE; i++) {
+        for (int i = 0; i < 10; i++) {
             gettimeofday(&t1, 0);
             if (windowcontrol[i].seq_num != -1) {
                 time_diff = timedifference_msec(windowcontrol[i].t, t1)/100;

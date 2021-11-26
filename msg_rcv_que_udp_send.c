@@ -8,7 +8,7 @@
         udp_init_client();
         t0=(struct timeval){0};
         gettimeofday(&t0, 0);
-        for(int i=0;i<SM_MSG_MAX_ARR_SIZE;i++)
+        for(int i=0;i<10;i++)
         {
             windowcontrol[i].status=-1;
             windowcontrol[i].seq_num=-1;
