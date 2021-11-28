@@ -83,7 +83,7 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
     while(1)
     {
         read_from_message_queue(&message,msqid_global);
-        message_compare=strcmp(string,message.topic);
+        message_compare=strcmp(SMP_SYSTEM_MESSAGE,message.topic);
         switch(message_compare)
         {
             case 0:
@@ -354,7 +354,7 @@ void * receiver_routine(struct timeval t0) {
                     windowcontrol[i].t.tv_sec=-1;
                     windowcontrol[i].t.tv_sec=-1;
                     sprintf(buf, "%d", windowcontrol[i].seq_num);
-                    message_queue_send(buf,"SMP SYS MSG");
+                    message_queue_send(buf,SMP_SYSTEM_MESSAGE);
                     printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
                 }
             }

@@ -55,6 +55,7 @@ float sampled_rtt;
 //message queue defines and global variables
 #define MAX_PAYLOAD_SIZE 50
 #define MAX_TOPIC_SIZE 20
+#define SMP_SYSTEM_MESSAGE "SMP SYS MSG"
 struct sm_msg {
     char topic[MAX_TOPIC_SIZE];
     char payload[MAX_PAYLOAD_SIZE];
