@@ -44,8 +44,6 @@ int main()
 
 
     char  topic[20];
-   // printf("enter topic name\n");
-    //scanf("%s",topic);
     msg_que_create("msgq");
     if(fork()==0){
         system("./msg_rcv_que_udp_send");

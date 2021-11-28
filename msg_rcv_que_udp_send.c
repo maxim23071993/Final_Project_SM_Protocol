@@ -4,7 +4,7 @@
         char c;
         pthread_t sender_thread,receiver_thread;
         pthread_mutex_init(&lock,NULL);
-        msg_rcv_init(&msqid_global,"incapsulation_debug");
+        msg_rcv_init(&msqid_global,"msgq");
         udp_init_client();
         t0=(struct timeval){0};
         gettimeofday(&t0, 0);

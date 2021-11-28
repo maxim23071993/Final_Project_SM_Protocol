@@ -6,7 +6,7 @@
 //message queu
 void msg_que_create(char *topic)
 {
-    int msqid;
+    //int msqid;
     key_t key;
     char for_ftok[30];
     char for_system[20];
@@ -24,11 +24,11 @@ void msg_que_create(char *topic)
         exit(1);
     }
 
-    if ((msqid = msgget(key, PERMS | IPC_CREAT)) == -1) {
+    if ((msqid_global = msgget(key, PERMS | IPC_CREAT)) == -1) {
         perror("msgget");
         exit(1);
     }
-    msqid_global=msqid;
+    //msqid_global=msqid;
     printf("Message Queue: created file: %s.txt\n",topic);
 }
 void msg_rcv_init(int* msqid,char *topic)
@@ -88,9 +88,8 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
         {
             case 0:
                 sqe_send_arr[0]=atoi(message.payload);
+              // break;
                 return;
-
-                // operator doesn't match any case constant +, -, *, /
             default:
               strcpy(arr->msg_arr[arr->arr_size].payload,message.payload);
               strcpy(arr->msg_arr[arr->arr_size].topic,message.topic);
@@ -303,7 +302,7 @@ void * sender_routine(void* arg)
         sequence_number_select(&sequence_number,5,TIME_TO_WAIT_FOR_WINDOW);
         message_encapsulation((struct sm_msg_arr *)&arr[sequence_number], 10, sequence_number,sqe_sender_arr);
 
-        gettimeofday(arg, 0);
+        //gettimeofday(arg, 0);
 
         pthread_mutex_lock(&lock);
 
@@ -351,8 +350,8 @@ void * receiver_routine(struct timeval t0) {
                     printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
                     printf("seq.num:%d,Time diff:%f, RTO:%f, RTT:%f\n",windowcontrol[i].seq_num,time_diff,RTO,RTT);
                     windowcontrol[i].status = -1;
-                    windowcontrol[i].t.tv_sec=-1;
-                    windowcontrol[i].t.tv_sec=-1;
+                    windowcontrol[i].t.tv_sec=0;
+                    windowcontrol[i].t.tv_usec=0;
                     sprintf(buf, "%d", windowcontrol[i].seq_num);
                     message_queue_send(buf,SMP_SYSTEM_MESSAGE);
                     printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
@@ -375,7 +374,9 @@ void * receiver_routine(struct timeval t0) {
 
             windowcontrol[ack_seq].status = -1;
             windowcontrol[ack_seq].seq_num = -1;
-            windowcontrol[ack_seq].t.tv_sec = -1;
+            windowcontrol[ack_seq].t.tv_sec = 0;
+            windowcontrol[ack_seq].t.tv_usec = 0;
+
             pthread_mutex_unlock(&lock);
 
         }

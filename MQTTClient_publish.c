@@ -51,9 +51,9 @@ int main()
     struct sm_msg message;
     strcpy(message.topic,"test");
     strcpy(message.payload,"123");
-    for(int i=0;i++;i<5){
+   while(1){
         mqtt_publish(&message);
-       sleep(0.25);
+       sleep(0.05);
     }
     return 0;
 }

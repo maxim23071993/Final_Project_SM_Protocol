@@ -49,7 +49,7 @@ int main()
 {
     int s_len=sizeof(servaddr);
     int c_len=sizeof(cliaddr);
-    int c=0; // debug
+    int c=1; // debug
     struct sm_msg_arr  message;
     //message.msg_arr=(struct sm_msg *)malloc(sizeof(struct sm_msg));
     //message=(struct sm_msg *)malloc(sizeof(struct sm_msg));
@@ -57,12 +57,12 @@ int main()
     while(1)
     {
         recvfrom(server_socket, &message, sizeof(struct sm_msg_arr), MSG_WAITALL, (struct sockaddr *) &cliaddr, &c_len);
-        if(message.sq_number!=2 && c!=2){ // debug
-            sendto(server_socket,&message.sq_number, sizeof(int),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
+        if(message.sq_number==2 && c==1)
+        {
+            c=0;
+            continue;
         }
-        if(message.sq_number==1)
-            c++;
-        //sendto(server_socket,&message.sq_number, sizeof(int),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
+        sendto(server_socket,&message.sq_number, sizeof(int),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
         printf("\n############################   %d   ####################################\n",message.sq_number);
         printf("ACK on message seq %d was sent to client\n",message.sq_number);
         for(int i=0;i< message.arr_size;i++)
