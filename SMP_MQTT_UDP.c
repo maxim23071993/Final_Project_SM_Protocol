@@ -341,14 +341,16 @@ void * receiver_routine(struct timeval t0) {
         pthread_mutex_lock(&lock);
         for (int i = 0; i < 10; i++) {
             gettimeofday(&t1, 0);
-            if (windowcontrol[i].seq_num != -1) {
-                time_diff = timedifference_msec(windowcontrol[i].t, t1)/100;
+            if (windowcontrol[i].status == 1) {
+                time_diff = timedifference_msec(windowcontrol[i].t, t1);
+                printf("seq.num:%d, time diff:%f\n", windowcontrol[i].seq_num, time_diff);
+            }
                 if (time_diff < min_t) {
                     min_t = time_diff;
                 }
-                if (time_diff >= RTO && windowcontrol[i].status == 1) {
+                if (time_diff >= RTO) {
                     printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
-                    printf("Time diff:%f, RTO:%f, RTT:%f\n",time_diff,RTO,RTT);
+                    printf("seq.num:%d,Time diff:%f, RTO:%f, RTT:%f\n",windowcontrol->seq_num,time_diff,RTO,RTT);
                     windowcontrol[i].status = 0;
                     windowcontrol[i].t.tv_sec=0;
                     sprintf(buf, "%d", windowcontrol[i].seq_num);
@@ -356,7 +358,6 @@ void * receiver_routine(struct timeval t0) {
                     printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
                 }
             }
-        }
         pthread_mutex_unlock(&lock);
         tv.tv_sec = min_t;
         tv.tv_usec = 0;

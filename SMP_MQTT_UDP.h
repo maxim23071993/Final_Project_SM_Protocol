@@ -84,7 +84,7 @@ struct sm_msg_arr{
 
 struct window_control{
     int seq_num;
-    int status; //(-1)-not sent yet,0-need to be sent,1-sent and waiting to ack
+    int status; //(-1)-not sent yet,1-sent and waiting to ack
     struct timeval t;
 };
 struct window_control windowcontrol[10];
