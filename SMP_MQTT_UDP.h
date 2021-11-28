@@ -38,6 +38,7 @@
 //RTT and RTO estimation defines and global variables
 #define NUM_OF_TRY 10
 #define INIT_TIME_OUT 1
+#define MAX_ALLOW_RTT 1
 #define ALPHA 0.5
 #define BETA 0.5
 #define GAMMA 0.5

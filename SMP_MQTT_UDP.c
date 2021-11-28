@@ -274,9 +274,11 @@ int RTT_init_respond() {
 }
 void Update_Net_Params(float SAMPLE_RTT)
 {
-    RTT=ALPHA*RTT+(1-ALPHA)*SAMPLE_RTT;
-    DEV=DEV+BETA*(abs((SAMPLE_RTT-RTT))-DEV);
-    RTO=RTT+GAMMA*DEV;
+    if(SAMPLE_RTT<=MAX_ALLOW_RTT) {
+        RTT = ALPHA * RTT + (1 - ALPHA) * SAMPLE_RTT;
+        DEV = DEV + BETA * (abs((SAMPLE_RTT - RTT)) - DEV);
+        RTO = RTT + GAMMA * DEV;
+    }
 }
 void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_for_sequence_select)
 {
@@ -345,13 +347,14 @@ void * receiver_routine(struct timeval t0) {
                 if (time_diff < min_t) {
                     min_t = time_diff;
                 }
-                if (time_diff >= RTO) {
+                if (time_diff >= RTO && windowcontrol[i].seq_num!=-1) {
                     printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
                     printf("seq.num:%d,Time diff:%f, RTO:%f, RTT:%f\n",windowcontrol[i].seq_num,time_diff,RTO,RTT);
                     windowcontrol[i].status = -1;
                     windowcontrol[i].t.tv_sec=-1;
+                    windowcontrol[i].t.tv_sec=-1;
                     sprintf(buf, "%d", windowcontrol[i].seq_num);
-                   // message_queue_send("SMP SYS MSG", buf);
+                    message_queue_send(buf,"SMP SYS MSG");
                     printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
                 }
             }

@@ -60,7 +60,7 @@ int main()
         if(message.sq_number!=2 && c!=2){ // debug
             sendto(server_socket,&message.sq_number, sizeof(int),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
         }
-        if(message.sq_number==2)
+        if(message.sq_number==1)
             c++;
         //sendto(server_socket,&message.sq_number, sizeof(int),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
         printf("\n############################   %d   ####################################\n",message.sq_number);
