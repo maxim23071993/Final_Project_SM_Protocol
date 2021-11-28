@@ -84,7 +84,7 @@ struct sm_msg_arr{
 
 struct window_control{
     int seq_num;
-    int status; //(-1)-not sent yet,0-need to be sent,1-sent and waiting to ack
+    int status; //(-1)-not sent yet,1-sent and waiting to ack
     struct timeval t;
 };
 struct window_control windowcontrol[10];
@@ -92,7 +92,7 @@ struct window_control windowcontrol[10];
 //message queue functions
 void msg_que_create(char *topic);
 void message_queue_send( char *msg_payload,char * topic);
-void msg_rcv_init(int* msqid);
+void msg_rcv_init(int* msqid,char *topic);
 void read_from_message_queue(struct sm_msg *message,int msqid);
 void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_number,int * sqe_send_arr);
 /*####################################################################################################################*/
@@ -101,11 +101,8 @@ void client_sockets_creation();
 void server_sockets_creation();
 int NETWORK_PARAMS_INIT();
 void udp_init_client();
-void* udp_send(struct sm_msg_arr* message);
 int ACK_rcv();
 int udp_init_server();
-void udp_rcv_server(struct sm_msg_arr *message);
-void ACK_send(int * ack_sqe);
 int RTT_init_respond();
 void Update_Net_Params(float SAMPLE_RTT);
 void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_for_sequence_select);

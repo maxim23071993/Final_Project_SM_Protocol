@@ -29,7 +29,23 @@ void msg_que_create(char *topic)
         exit(1);
     }
     msqid_global=msqid;
-    printf("message queue: ready to send messages\n");
+    printf("Message Queue: created file: %s.txt\n",topic);
+}
+void msg_rcv_init(int* msqid,char *topic)
+{
+    char for_ftok[30];
+    strcpy(for_ftok,topic);
+    strcat(for_ftok,".txt");
+    key_t key;
+    if ((key = ftok(for_ftok, 'B')) == -1) {
+        perror("ftok");
+        exit(1);
+    }
+    if (((*msqid) = msgget(key, PERMS)) == -1) { /* connect to the queue */
+        perror("msgget");
+        exit(1);
+    }
+    printf("Message Queue: ready to receive messages from file: %s.txt\n",topic);
 }
 void message_queue_send( char *msg_payload,char * topic)
 {
@@ -48,18 +64,6 @@ void read_from_message_queue(struct sm_msg *message,int msqid){
         exit(1);
     }
 }
-void msg_rcv_init(int* msqid){
-    key_t key;
-    if ((key = ftok("incapsulation_debug.txt", 'B')) == -1) {
-        perror("ftok");
-        exit(1);
-    }
-    if (((*msqid) = msgget(key, PERMS)) == -1) { /* connect to the queue */
-        perror("msgget");
-        exit(1);
-    }
-    printf("message queue: ready to receive messages.\n");
-}
 void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_number,int * sqe_send_arr)
 {
     /*int rc;
@@ -74,6 +78,8 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
     arr->arr_size=0;
     sqe_send_arr[0]=-1;
     sqe_send_arr[1]=-1;
+    arr->sq_number = sqe_number;
+    sqe_send_arr[1]=sqe_number;
     while(1)
     {
         read_from_message_queue(&message,msqid_global);
@@ -90,8 +96,6 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
               strcpy(arr->msg_arr[arr->arr_size].topic,message.topic);
                 (arr->arr_size)++;
               if((arr->arr_size)==data_arr_size) {
-                  arr->sq_number = sqe_number;
-                  sqe_send_arr[1]=sqe_number;
                   return;
               }
         }
@@ -198,11 +202,6 @@ int ACK_rcv()
     }
     else{return -1;}
 }
-void ACK_send(int * ack_sqe){
-    int len=sizeof(cliaddr);
-    sendto(server_socket,  ack_sqe, sizeof(int),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,len);
-    printf(" ACK  %d message sent from server for packet nober :.\n",*ack_sqe);
-}
 //RTT and RTO estimation
 float timedifference_msec(struct timeval t0, struct timeval t1)
 {
@@ -286,9 +285,7 @@ void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_
     while(windowcontrol[*previous_sqe+1].status!=(-1))
         usleep(time_to_wait_for_sequence_select);
     (*previous_sqe)++;
-
 }
-
 /*####################################################################################################################*/
 //Thread routine
 void * sender_routine(void* arg)
@@ -311,10 +308,10 @@ void * sender_routine(void* arg)
         for(int i=0;i<2;i++)
         {
             if(sqe_sender_arr[i]!=(-1))
-           // if(windowcontrol[sqe_sender_arr[i]].status==0)
             {
                 sendto(client_socket, &arr[sqe_sender_arr[i]], sizeof(struct sm_msg_arr), MSG_CONFIRM,(const struct sockaddr *) &servaddr, s_len);
                 windowcontrol[sqe_sender_arr[i]].status = 1;
+                windowcontrol[sqe_sender_arr[i]].seq_num=sequence_number;
                 gettimeofday(&(windowcontrol[sqe_sender_arr[i]].t), 0);
             }
         }
@@ -342,7 +339,7 @@ void * receiver_routine(struct timeval t0) {
         for (int i = 0; i < 10; i++) {
             gettimeofday(&t1, 0);
             if (windowcontrol[i].seq_num != -1) {
-                time_diff = timedifference_msec(windowcontrol[i].t, t1)/100;
+                time_diff = timedifference_msec(windowcontrol[i].t, t1);
                 if (time_diff < min_t) {
                     min_t = time_diff;
                 }

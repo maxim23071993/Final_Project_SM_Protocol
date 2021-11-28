@@ -12,12 +12,12 @@ int main()
     struct sm_msg msg;
     struct sm_msg_arr arr[10];
     msg_que_create("incapsulation_debug");
-    msg_rcv_init(&msqid);
+    msg_rcv_init(&msqid,"incapsulation_debug");
 
     for( i=0;i<100;i++)
     {
         message_queue_send("topic","payload");
     }
-   // message_encapsulation(arr,10,0);
+    //message_encapsulation(arr,10,0,NULL);
     return 0;
 }
