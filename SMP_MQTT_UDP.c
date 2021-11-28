@@ -71,6 +71,7 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
     /*int num_messages;
     rc = msgctl(msqid_global, IPC_STAT, &buf);
     num_messages = buf.msg_qnum;*/
+    arr->arr_size=0;
     sqe_send_arr[0]=-1;
     sqe_send_arr[1]=-1;
     while(1)
@@ -128,7 +129,7 @@ void client_sockets_creation()
     memset(&servaddr, 0, sizeof(servaddr));
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = /*inet_addr(SERVER_IP);;*/INADDR_ANY;//inet_addr(SERVER_IP);
+    servaddr.sin_addr.s_addr = /*inet_addr(SERVER_IP);;*/INADDR_ANY;
     servaddr.sin_port = htons(SERVER_PORT);
     printf("UDP send socket created\n");
 
@@ -151,7 +152,7 @@ void server_sockets_creation()
 
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr("192.168.1.117");
+    servaddr.sin_addr.s_addr = INADDR_ANY;//*/inet_addr("192.168.1.117");
     servaddr.sin_port = htons(SERVER_PORT);
 
     // Bind the socket with the server address
@@ -164,7 +165,7 @@ void server_sockets_creation()
 
     memset(&cliaddr, 0, sizeof(cliaddr));
     cliaddr.sin_family = AF_INET; // IPv4
-    cliaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr("192.168.1.113");
+    cliaddr.sin_addr.s_addr = INADDR_ANY;//*/inet_addr("192.168.1.113");
     cliaddr.sin_port = htons(CLIENT_PORT);
     printf("UDP send socket created\n");
 
@@ -278,12 +279,12 @@ void Update_Net_Params(float SAMPLE_RTT)
     DEV=DEV+BETA*(abs((SAMPLE_RTT-RTT))-DEV);
     RTO=RTT+GAMMA*DEV;
 }
-void sequence_number_select(int * previous_sqe)
+void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_for_sequence_select)
 {
-    if(*previous_sqe==SM_MSG_MAX_ARR_SIZE)
+    if(*previous_sqe==window_size-1)
         *previous_sqe=-1;
     while(windowcontrol[*previous_sqe+1].status!=(-1))
-        usleep(TIME_TO_WAIT_FOR_WINDOW);
+        usleep(time_to_wait_for_sequence_select);
     (*previous_sqe)++;
 
 }
@@ -296,11 +297,11 @@ void * sender_routine(void* arg)
     int c_len=sizeof(cliaddr);
     int sequence_number=(-1);
     int sqe_sender_arr[2];
-    struct sm_msg_arr arr[10];
+    struct sm_msg_arr arr[11];
 
     while(1)
     {
-        sequence_number_select(&sequence_number);
+        sequence_number_select(&sequence_number,5,TIME_TO_WAIT_FOR_WINDOW);
         message_encapsulation((struct sm_msg_arr *)&arr[sequence_number], 10, sequence_number,sqe_sender_arr);
 
         gettimeofday(arg, 0);

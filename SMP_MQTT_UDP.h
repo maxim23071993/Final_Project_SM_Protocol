@@ -108,7 +108,7 @@ void udp_rcv_server(struct sm_msg_arr *message);
 void ACK_send(int * ack_sqe);
 int RTT_init_respond();
 void Update_Net_Params(float SAMPLE_RTT);
-void sequence_number_select(int * previous_sqe);
+void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_for_sequence_select);
 /*####################################################################################################################*/
 //Thread routine
 void * sender_routine();
