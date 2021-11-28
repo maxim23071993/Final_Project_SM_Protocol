@@ -347,9 +347,9 @@ void * receiver_routine(struct timeval t0) {
                 }
                 if (time_diff >= RTO) {
                     printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
-                    printf("seq.num:%d,Time diff:%f, RTO:%f, RTT:%f\n",windowcontrol->seq_num,time_diff,RTO,RTT);
-                    windowcontrol[i].status = 0;
-                    windowcontrol[i].t.tv_sec=0;
+                    printf("seq.num:%d,Time diff:%f, RTO:%f, RTT:%f\n",windowcontrol[i].seq_num,time_diff,RTO,RTT);
+                    windowcontrol[i].status = -1;
+                    windowcontrol[i].t.tv_sec=-1;
                     sprintf(buf, "%d", windowcontrol[i].seq_num);
                    // message_queue_send("SMP SYS MSG", buf);
                     printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
