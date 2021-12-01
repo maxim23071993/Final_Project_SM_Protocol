@@ -33,16 +33,15 @@
 #define CLIENT_IP "192.168.1.113"
 
 
-#define NUM_OF_TRY 10
 /*####################################################################################################################*/
 //RTT and RTO estimation defines and global variables
-#define NUM_OF_TRY 10
-#define INIT_TIME_OUT 1
-#define MAX_ALLOW_RTT 1
-#define ALPHA 0.5
-#define BETA 0.5
-#define GAMMA 0.5
-#define DELTA 0.1
+#define NUM_OF_TRY 10 //+
+#define INIT_TIME_OUT 1//+
+#define MAX_ALLOW_RTT 1//+
+#define ALPHA 0.5//+
+#define BETA 0.5//+
+#define GAMMA 0.5//+
+#define DELTA 0.1//+
 struct timeval t0;
 struct timeval t1;
 float RTT;
@@ -51,8 +50,22 @@ float DEV;
 float RTT_SERVER;
 float RTO_SERVER;
 float sampled_rtt;
+struct smp_network_params{
+    int udp_client_port;
+    int udp_serve_portr;
+    int bandwidth;
+    int connection_retransmission_num;
+    int init_time_out;
+    int max_rtt;
+    float alpha;
+    float beta;
+    float gamma;
+    float delta;
+};
+struct smp_network_params network_params;
 /*####################################################################################################################*/
 //message queue defines and global variables
+#define PERMS 0644
 #define MAX_PAYLOAD_SIZE 50
 #define MAX_TOPIC_SIZE 20
 #define SMP_SYSTEM_MESSAGE "SMP SYS MSG"
@@ -62,16 +75,16 @@ struct sm_msg {
 };
 int msqid_global;
 pthread_mutex_t lock;
-#define PERMS 0644
 /*####################################################################################################################*/
 //UDP defines and global variables
-#define CLIENT_PORT  8080
-#define SERVER_PORT  8081
+#define CLIENT_PORT  8080//+
+#define SERVER_PORT  8081//+
 #define MAXLINE 1024
-#define UDP_BANDWIDTH 100000 //100 kbps
+#define UDP_BANDWIDTH 100000 //100 kbps //+
 #define MAX_UDP_PACKET (UDP_BANDWIDTH/8)
 #define SM_MSG_MAX_ARR_SIZE (MAX_UDP_PACKET/70)
-#define TIME_TO_WAIT_FOR_WINDOW 100 //100 useconds
+#define TIME_TO_WAIT_FOR_WINDOW 100 // useconds
+
 int client_socket;
 int server_socket;
 int window_size;
@@ -88,6 +101,12 @@ struct window_control{
     int seq_num;
     int status; //(-1)-not sent yet,1-sent and waiting to ack
     struct timeval t;
+};
+struct smp_client_server_params{
+    float rtt;
+    float rto;
+    int window_size;
+    int smp_msg_arr_size;
 };
 struct window_control windowcontrol[10];
 /*####################################################################################################################*/
@@ -112,6 +131,6 @@ void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_
 //Thread routine
 void * sender_routine();
 void * receiver_routine();
-
+void init_network_params();
 
 #endif //MQTT_CLIENTS_SMP_MQTT_UDP_H
