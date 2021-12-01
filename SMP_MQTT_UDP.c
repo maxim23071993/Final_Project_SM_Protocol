@@ -37,11 +37,12 @@ void msg_rcv_init(int* msqid,char *topic)
     strcpy(for_ftok,topic);
     strcat(for_ftok,".txt");
     key_t key;
-    if ((key = ftok(for_ftok, 'B')) == -1) {
+    if ((key = ftok(for_ftok,'B')) == -1) {
         perror("ftok");
         exit(1);
     }
-    if (((*msqid) = msgget(key, PERMS)) == -1) { /* connect to the queue */
+    if (((*msqid) = msgget(key,PERMS)) == -1) { /* connect to the queue */
+
         perror("msgget");
         exit(1);
     }
@@ -212,6 +213,11 @@ int NETWORK_PARAMS_INIT(){
     int num_of_try =0,n=-1,k=-1;
     char msg[10];
 
+    struct timeval tv;
+    tv.tv_sec = INIT_TIME_OUT;
+    tv.tv_usec = 0;
+    setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+
     gettimeofday(&t0, 0);
     sendto(client_socket, "RTT_INIT", sizeof("RTT_INIT"),MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
     while(num_of_try<NUM_OF_TRY)
@@ -220,12 +226,13 @@ int NETWORK_PARAMS_INIT(){
         if ((timedifference_msec(t0,t1) >=INIT_TIME_OUT) && (num_of_try <= NUM_OF_TRY) ) { // max timer val for retransmtion?? // num of trys?
             t0=(struct timeval){0};
             t1=(struct timeval){0};
-            printf("\nif get in\n");
+            printf("No respond from server, trying again to init RTT\n");
             sendto(client_socket, "RTT_INIT", sizeof("RTT_INIT"), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
             gettimeofday(&t0, 0);
         }
-        n=ACK_rcv();
-        if(n==1) {
+       // n=ACK_rcv();
+        n = recvfrom(client_socket, (char *)msg, MAXLINE,SO_RCVTIMEO, (struct sockaddr *) &servaddr,&s_len);
+        if(n!=-1) {
             gettimeofday(&t1, 0);
             RTT = timedifference_msec(t0, t1);
             RTO =  RTT+DELTA*RTT;
@@ -235,10 +242,13 @@ int NETWORK_PARAMS_INIT(){
             printf("Updating server...\n");
             for(int i=0;i<NUM_OF_TRY;i++) {
                 sendto(client_socket, &RTT, sizeof(RTT), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
-                k = ACK_rcv();
-                if (k != -1) { return(1); }
+                //k = ACK_rcv();
+                k = recvfrom(client_socket, (char *)msg, MAXLINE,SO_RCVTIMEO, (struct sockaddr *) &servaddr,&s_len);
+                if (k != -1){
+                return(1);
+                }
             }
-            printf("Updating operation fai  led! server not respond!!\n");
+            printf("Updating operation failed! server not respond!!\n");
             return(-1);
 
         }
@@ -258,10 +268,10 @@ int RTT_init_respond() {
     char *RTT_ack = {"RTT_INIT_ACK"};
     char RTT_init_msg[20];
 
-    while (n == -1) {
+   // while (n == -1) {
         n = recvfrom(server_socket, RTT_init_msg, sizeof(RTT_init_msg), MSG_WAITALL, (struct sockaddr *) &cliaddr, &c_len);
         if (n != -1) {
-            printf("\n RTT_INIT msg receive from clint\n");
+            printf("RTT_INIT msg receive from clint\n");
             sendto(server_socket, (const char *) RTT_ack, sizeof(RTT_ack), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
             printf("%s message sent.\n", RTT_ack);
             k = recvfrom(server_socket, &RTT_SERVER, sizeof(RTT_SERVER), MSG_WAITALL, (struct sockaddr *) &cliaddr,&c_len);
@@ -269,14 +279,14 @@ int RTT_init_respond() {
             sendto(server_socket, (const char *) RTT_ack, sizeof(RTT_ack), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
             return (1);
         }
-    }
+    //}
 }
 void Update_Net_Params(float SAMPLE_RTT)
 {
-    if(SAMPLE_RTT<=MAX_ALLOW_RTT) {
-        RTT = ALPHA * RTT + (1 - ALPHA) * SAMPLE_RTT;
-        DEV = DEV + BETA * (abs((SAMPLE_RTT - RTT)) - DEV);
-        RTO = RTT + GAMMA * DEV;
+    if(SAMPLE_RTT<=MAX_ALLOW_RTT) {  // filter for faulty RTT measurements.
+        RTT = (1-ALPHA)*RTT+ ALPHA * SAMPLE_RTT;
+        DEV = DEV*(1-BETA)+BETA*(abs((SAMPLE_RTT - RTT)));
+        RTO = RTT + 4*DEV;
     }
 }
 void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_for_sequence_select)
