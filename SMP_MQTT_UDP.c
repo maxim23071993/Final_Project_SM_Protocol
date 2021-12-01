@@ -115,14 +115,13 @@ void client_sockets_creation()
 
     //Filling server information
     cliaddr.sin_family = AF_INET; // IPv4
-    cliaddr.sin_addr.s_addr = /*inet_addr(CLIENT_IP);*/INADDR_ANY;
+    cliaddr.sin_addr.s_addr = INADDR_ANY;//inet_addr(CLIENT_IP);//*/
     cliaddr.sin_port = htons(CLIENT_PORT);
 
 
     // Bind the socket with the server address
     //if (bind(client_receive_socket, (const struct sockaddr *) &cliaddr, sizeof(cliaddr)) < 0)
     if (bind(client_socket, (const struct sockaddr *) &cliaddr, sizeof(cliaddr)) < 0)
-
     {
         perror("bind failed");
         exit(EXIT_FAILURE);
@@ -133,7 +132,7 @@ void client_sockets_creation()
     memset(&servaddr, 0, sizeof(servaddr));
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = /*inet_addr(SERVER_IP);;*/INADDR_ANY;
+    servaddr.sin_addr.s_addr = inet_addr(SERVER_IP);///;*/INADDR_ANY;
     servaddr.sin_port = htons(SERVER_PORT);
     printf("UDP send socket created\n");
 
@@ -156,7 +155,7 @@ void server_sockets_creation()
 
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = INADDR_ANY;//*/inet_addr("192.168.1.117");
+    servaddr.sin_addr.s_addr =inet_addr(SERVER_IP);
     servaddr.sin_port = htons(SERVER_PORT);
 
     // Bind the socket with the server address
@@ -169,7 +168,7 @@ void server_sockets_creation()
 
     memset(&cliaddr, 0, sizeof(cliaddr));
     cliaddr.sin_family = AF_INET; // IPv4
-    cliaddr.sin_addr.s_addr = INADDR_ANY;//*/inet_addr("192.168.1.113");
+    cliaddr.sin_addr.s_addr = inet_addr(CLIENT_IP);
     cliaddr.sin_port = htons(CLIENT_PORT);
     printf("UDP send socket created\n");
 
@@ -177,7 +176,7 @@ void server_sockets_creation()
 int udp_init_server()
 {
     server_sockets_creation();
-    RTT_init_respond();
+    server_init_respond();
 }
 int ACK_rcv()
 {
@@ -213,11 +212,11 @@ int NETWORK_PARAMS_INIT(){
     int num_of_try =0,n=-1,k=-1;
     char msg[10];
 
+
     struct timeval tv;
     tv.tv_sec = INIT_TIME_OUT;
     tv.tv_usec = 0;
-    setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
-
+   setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
     gettimeofday(&t0, 0);
     sendto(client_socket, "RTT_INIT", sizeof("RTT_INIT"),MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
     while(num_of_try<NUM_OF_TRY)
@@ -226,7 +225,7 @@ int NETWORK_PARAMS_INIT(){
         if ((timedifference_msec(t0,t1) >=INIT_TIME_OUT) && (num_of_try <= NUM_OF_TRY) ) { // max timer val for retransmtion?? // num of trys?
             t0=(struct timeval){0};
             t1=(struct timeval){0};
-            printf("No respond from server, trying again to init RTT\n");
+            printf("No respond from server, trying again to init RTT...\n");
             sendto(client_socket, "RTT_INIT", sizeof("RTT_INIT"), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
             gettimeofday(&t0, 0);
         }
@@ -237,11 +236,13 @@ int NETWORK_PARAMS_INIT(){
             RTT = timedifference_msec(t0, t1);
             RTO =  RTT+DELTA*RTT;
             DEV=0;
+            client_server_params.rtt=RTT;
+            client_server_params.rtt=RTO;
             printf("RTT was init to %f milliseconds.\n", RTT);
             printf("RTO was init to %f milliseconds.\n", RTO);
-            printf("Updating server...\n");
+            printf("Sending params to server...\n");
             for(int i=0;i<NUM_OF_TRY;i++) {
-                sendto(client_socket, &RTT, sizeof(RTT), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
+                sendto(client_socket, &client_server_params, sizeof(client_server_params), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
                 //k = ACK_rcv();
                 k = recvfrom(client_socket, (char *)msg, MAXLINE,SO_RCVTIMEO, (struct sockaddr *) &servaddr,&s_len);
                 if (k != -1){
@@ -259,34 +260,52 @@ int NETWORK_PARAMS_INIT(){
         exit(1);
     }
 }
-int RTT_init_respond() {
-    // respond to RTT init msg from client
+void server_init_respond() {
+
+    // respond to init msg from client
     int c_len = sizeof(cliaddr);
     int s_len = sizeof(servaddr);
     int num_of_try = 1;
     int n = -1, k = -1;
     char *RTT_ack = {"RTT_INIT_ACK"};
     char RTT_init_msg[20];
+    struct smp_client_server_params tmp;
 
-   // while (n == -1) {
-        n = recvfrom(server_socket, RTT_init_msg, sizeof(RTT_init_msg), MSG_WAITALL, (struct sockaddr *) &cliaddr, &c_len);
+    struct timeval tv;
+    tv.tv_sec = 10;
+    tv.tv_usec = 0;
+    if(setsockopt(server_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv)<0)
+    { perror("setsockopt failed:");}
+
+    while (n == -1) {
+        n = recvfrom(server_socket, RTT_init_msg, sizeof(RTT_init_msg),MSG_WAITALL, (struct sockaddr *) &cliaddr, &c_len);
         if (n != -1) {
-            printf("RTT_INIT msg receive from clint\n");
-            sendto(server_socket, (const char *) RTT_ack, sizeof(RTT_ack), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
-            printf("%s message sent.\n", RTT_ack);
-            k = recvfrom(server_socket, &RTT_SERVER, sizeof(RTT_SERVER), MSG_WAITALL, (struct sockaddr *) &cliaddr,&c_len);
-            if (k != -1) { printf("RTT_SERVER was init to %f millisecond...\n", RTT_SERVER); }
-            sendto(server_socket, (const char *) RTT_ack, sizeof(RTT_ack), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
-            return (1);
+            if (strcmp(RTT_init_msg, "RTT_INIT") == 0) {
+                printf("RTT_INIT msg receive from clint\n");
+                sendto(server_socket, (const char *) RTT_ack, sizeof(RTT_ack), MSG_CONFIRM,(const struct sockaddr *) &cliaddr, c_len);
+                printf("%s message sent to client.\n", RTT_ack);
+                k = recvfrom(server_socket, &tmp, sizeof(RTT_SERVER), MSG_WAITALL, (struct sockaddr *) &cliaddr,&c_len);
+                if (k != -1) {
+                    RTT_SERVER=tmp.rtt;
+                    RTO_SERVER=tmp.rto;
+                    printf("RTT_SERVER was init to %f millisecond...\n", RTT_SERVER);
+                    printf("RTT_SERVER was init to %f millisecond...\n", RTT_SERVER);
+
+                }
+                sendto(server_socket, (const char *) RTT_ack, sizeof(RTT_ack), MSG_CONFIRM,
+                       (const struct sockaddr *) &cliaddr, c_len);
+                return;
+            }
         }
-    //}
+        }
+
 }
 void Update_Net_Params(float SAMPLE_RTT)
 {
     if(SAMPLE_RTT<=MAX_ALLOW_RTT) {  // filter for faulty RTT measurements.
         RTT = (1-ALPHA)*RTT+ ALPHA * SAMPLE_RTT;
         DEV = DEV*(1-BETA)+BETA*(abs((SAMPLE_RTT - RTT)));
-        RTO = RTT + 4*DEV;
+        RTO = RTT + 4*abs(DEV);
     }
 }
 void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_for_sequence_select)
@@ -378,7 +397,7 @@ void * receiver_routine(struct timeval t0) {
 
             pthread_mutex_lock(&lock);
 
-            sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, t1);
+            sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, t1)/10;
             printf("RTT sample: %f, RTT:%f,RTO:%f\n",sampled_rtt,RTT,RTO);
             Update_Net_Params(sampled_rtt);
 

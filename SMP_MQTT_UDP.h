@@ -108,6 +108,7 @@ struct smp_client_server_params{
     int window_size;
     int smp_msg_arr_size;
 };
+struct smp_client_server_params client_server_params;
 struct window_control windowcontrol[10];
 /*####################################################################################################################*/
 //message queue functions
@@ -124,7 +125,7 @@ int NETWORK_PARAMS_INIT();
 void udp_init_client();
 int ACK_rcv();
 int udp_init_server();
-int RTT_init_respond();
+void server_init_respond();
 void Update_Net_Params(float SAMPLE_RTT);
 void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_for_sequence_select);
 /*####################################################################################################################*/
