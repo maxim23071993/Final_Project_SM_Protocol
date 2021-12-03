@@ -49,26 +49,24 @@ int main()
 {
     int s_len=sizeof(servaddr);
     int c_len=sizeof(cliaddr);
-    int c=1; // debug
+    int n;
     struct sm_msg_arr  message;
     //message.msg_arr=(struct sm_msg *)malloc(sizeof(struct sm_msg));
     //message=(struct sm_msg *)malloc(sizeof(struct sm_msg));
     udp_init_server();
+    printf("Server waiting for message.\n");
     while(1)
     {
-        recvfrom(server_socket, &message, sizeof(struct sm_msg_arr), MSG_WAITALL, (struct sockaddr *) &cliaddr, &c_len);
-        if(message.sq_number==2 && c==1)
-        {
-            c=0;
-            continue;
+        n=recvfrom(server_socket, &message, sizeof(struct sm_msg_arr), MSG_WAITALL, (struct sockaddr *) &cliaddr, &c_len);
+        if(n!=-1) {
+            sendto(server_socket, &message.sq_number, sizeof(int), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,
+                   c_len);
+            printf("\n############################   %d   ####################################\n", message.sq_number);
+            printf("ACK on message seq %d was sent to client\n", message.sq_number);
+            for (int i = 0; i < message.arr_size; i++)
+                printf("%s %s \n", message.msg_arr[i].topic, message.msg_arr[i].payload);
+            //mqtt_publish(message);
         }
-        sendto(server_socket,&message.sq_number, sizeof(int),MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
-        printf("\n############################   %d   ####################################\n",message.sq_number);
-        printf("ACK on message seq %d was sent to client\n",message.sq_number);
-        for(int i=0;i< message.arr_size;i++)
-            printf("%s %s \n",message.msg_arr[i].topic,message.msg_arr[i].payload);
-        //mqtt_publish(message);
-
     }
     return 0;
 }
