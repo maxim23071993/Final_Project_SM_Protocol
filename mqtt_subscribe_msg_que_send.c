@@ -3,8 +3,6 @@
 
 volatile MQTTClient_deliveryToken deliveredtoken;
 
-
-
 void delivered(void *context, MQTTClient_deliveryToken dt)
 {
     printf("Message with token value %d delivery confirmed\n", dt);
@@ -34,16 +32,16 @@ void connlost(void *context, char *cause)
     printf("     cause: %s\n", cause);
 }
 
-int main()
+void main_(int argc,void *argv)
 {
 
     MQTTClient client;
     MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
     int rc;
     int ch;
-
-
-    char  topic[20];
+    init_params(argv);
+    struct window_control  * win_control= (struct window_control *)malloc(sizeof(struct window_control )*client_server_params.window_size);
+    windowcontrol=win_control;
     msg_que_create("msgq");
     if(fork()==0){
         system("./msg_rcv_que_udp_send");

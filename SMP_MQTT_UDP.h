@@ -29,19 +29,8 @@
 #define PAYLOAD     "Hello World!"
 #define QOS         1
 #define TIMEOUT     10000L
-#define SERVER_IP "192.168.1.117"
-#define CLIENT_IP "192.168.1.113"
-
-
 /*####################################################################################################################*/
 //RTT and RTO estimation defines and global variables
-#define NUM_OF_TRY 10 //+
-#define INIT_TIME_OUT 1//+
-#define MAX_ALLOW_RTT 1//+
-#define ALPHA 0.5//+
-#define BETA 0.5//+
-#define GAMMA 0.5//+
-#define DELTA 0.1//+
 struct timeval t0;
 struct timeval t1;
 float RTT;
@@ -51,22 +40,24 @@ float RTT_SERVER;
 float RTO_SERVER;
 float sampled_rtt;
 struct smp_network_params{
-    int udp_client_port;
-    int udp_serve_portr;
+    int CLIENT_PORT;
+    char CLIENT_IP[15];
+    int SERVER_PORT;
+    char SERVER_IP[15];
     int bandwidth;
-    int connection_retransmission_num;
-    int init_time_out;
-    int max_rtt;
-    float alpha;
-    float beta;
-    float gamma;
-    float delta;
+    int NUM_OF_TRY;//connection retransmission number
+    float INIT_TIME_OUT;
+    float MAX_ALLOW_RTT;
+    float ALPHA;
+    float BETA;
+    float GAMMA;
+    float DELTA;
 };
 struct smp_network_params network_params;
 /*####################################################################################################################*/
 //message queue defines and global variables
 #define PERMS 0644
-#define MAX_PAYLOAD_SIZE 50
+#define MAX_PAYLOAD_SIZE 30
 #define MAX_TOPIC_SIZE 20
 #define SMP_SYSTEM_MESSAGE "SMP SYS MSG"
 struct sm_msg {
@@ -77,22 +68,21 @@ int msqid_global;
 pthread_mutex_t lock;
 /*####################################################################################################################*/
 //UDP defines and global variables
-#define CLIENT_PORT  8080//+
-#define SERVER_PORT  8081//+
 #define MAXLINE 1024
-#define UDP_BANDWIDTH 100000 //100 kbps //+
-#define MAX_UDP_PACKET (UDP_BANDWIDTH/8)
-#define SM_MSG_MAX_ARR_SIZE (MAX_UDP_PACKET/70)
 #define TIME_TO_WAIT_FOR_WINDOW 100 // useconds
+
+//#define UDP_BANDWIDTH 100000 //100 kbps //+
+//#define MAX_UDP_PACKET (UDP_BANDWIDTH/8)
+//#define SM_MSG_MAX_ARR_SIZE (MAX_UDP_PACKET/70)
 
 int client_socket;
 int server_socket;
-int window_size;
+//int window_size;
 
 struct sockaddr_in servaddr,cliaddr;
 
 struct sm_msg_arr{
-    struct sm_msg  msg_arr[SM_MSG_MAX_ARR_SIZE];
+    struct sm_msg  *msg_arr;
     int arr_size;
     int sq_number;
 };
@@ -108,7 +98,8 @@ struct smp_client_server_params{
     int window_size;
     int smp_msg_arr_size;
 };
-struct window_control windowcontrol[10];
+struct smp_client_server_params client_server_params;
+struct window_control * windowcontrol;
 /*####################################################################################################################*/
 //message queue functions
 void msg_que_create(char *topic);
@@ -122,7 +113,6 @@ void client_sockets_creation();
 void server_sockets_creation();
 int NETWORK_PARAMS_INIT();
 void udp_init_client();
-int ACK_rcv();
 int udp_init_server();
 int RTT_init_respond();
 void Update_Net_Params(float SAMPLE_RTT);
@@ -131,6 +121,6 @@ void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_
 //Thread routine
 void * sender_routine();
 void * receiver_routine();
-void init_network_params();
+void init_params(char *file_name);
 
 #endif //MQTT_CLIENTS_SMP_MQTT_UDP_H

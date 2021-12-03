@@ -66,13 +66,13 @@ void read_from_message_queue(struct sm_msg *message,int msqid){
 }
 void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_number,int * sqe_send_arr)
 {
-    /*int rc;
-    int msqid;
-    struct msqid_ds buf;*/
+
+    struct msqid_ds buf;
     struct sm_msg message;
     int message_compare;
-    char string[]={"SMP SYS MSG"};
     /*int num_messages;
+    int rc;
+    int msqid;
     rc = msgctl(msqid_global, IPC_STAT, &buf);
     num_messages = buf.msg_qnum;*/
     arr->arr_size=0;
@@ -94,9 +94,9 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
               strcpy(arr->msg_arr[arr->arr_size].payload,message.payload);
               strcpy(arr->msg_arr[arr->arr_size].topic,message.topic);
                 (arr->arr_size)++;
-              if((arr->arr_size)==data_arr_size) {
+                msgctl(msqid_global, IPC_STAT, &buf);
+              if((arr->arr_size)==data_arr_size || buf.msg_qnum==0)
                   return;
-              }
         }
 
     }
@@ -115,7 +115,7 @@ void client_sockets_creation()
     //Filling server information
     cliaddr.sin_family = AF_INET; // IPv4
     cliaddr.sin_addr.s_addr = /*inet_addr(CLIENT_IP);*/INADDR_ANY;
-    cliaddr.sin_port = htons(CLIENT_PORT);
+    cliaddr.sin_port = htons(network_params.CLIENT_PORT);
 
 
     // Bind the socket with the server address
@@ -133,7 +133,7 @@ void client_sockets_creation()
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
     servaddr.sin_addr.s_addr = /*inet_addr(SERVER_IP);;*/INADDR_ANY;
-    servaddr.sin_port = htons(SERVER_PORT);
+    servaddr.sin_port = htons(network_params.SERVER_PORT);
     printf("UDP send socket created\n");
 
 }
@@ -156,7 +156,7 @@ void server_sockets_creation()
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
     servaddr.sin_addr.s_addr = INADDR_ANY;//*/inet_addr("192.168.1.117");
-    servaddr.sin_port = htons(SERVER_PORT);
+    servaddr.sin_port = htons(network_params.SERVER_PORT);
 
     // Bind the socket with the server address
     if (bind(server_socket, (const struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
@@ -169,7 +169,7 @@ void server_sockets_creation()
     memset(&cliaddr, 0, sizeof(cliaddr));
     cliaddr.sin_family = AF_INET; // IPv4
     cliaddr.sin_addr.s_addr = INADDR_ANY;//*/inet_addr("192.168.1.113");
-    cliaddr.sin_port = htons(CLIENT_PORT);
+    cliaddr.sin_port = htons(network_params.CLIENT_PORT);
     printf("UDP send socket created\n");
 
 }
@@ -178,29 +178,7 @@ int udp_init_server()
     server_sockets_creation();
     RTT_init_respond();
 }
-int ACK_rcv()
-{
-    int s_len=sizeof(servaddr);
-    int n;
-    //float sampled_rtt;
-    char buffer[MAXLINE];
-    struct timeval tv;
-    tv.tv_sec = INIT_TIME_OUT;
-    tv.tv_usec = 0;
 
-    //setsockopt(client_receive_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
-
-   // n = recvfrom(client_receive_socket, (char *)buffer, MAXLINE,SO_RCVTIMEO, (struct sockaddr *) &servaddr,&s_len);
-    n = recvfrom(client_socket, (char *)buffer, MAXLINE,MSG_WAITALL, (struct sockaddr *) &servaddr,&s_len);
-
-
-    if(n!=-1)
-    {   buffer[n] = '\0';
-        printf("Server : %s\n", buffer);
-        return 1;
-    }
-    else{return -1;}
-}
 //RTT and RTO estimation
 float timedifference_msec(struct timeval t0, struct timeval t1)
 {
@@ -214,28 +192,28 @@ int NETWORK_PARAMS_INIT(){
 
     gettimeofday(&t0, 0);
     sendto(client_socket, "RTT_INIT", sizeof("RTT_INIT"),MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
-    while(num_of_try<NUM_OF_TRY)
+    while(num_of_try<network_params.NUM_OF_TRY)
     {
         gettimeofday(&t1, 0);
-        if ((timedifference_msec(t0,t1) >=INIT_TIME_OUT) && (num_of_try <= NUM_OF_TRY) ) { // max timer val for retransmtion?? // num of trys?
+        if ((timedifference_msec(t0,t1) >=network_params.INIT_TIME_OUT) && (num_of_try <= network_params.NUM_OF_TRY) ) { // max timer val for retransmtion?? // num of trys?
             t0=(struct timeval){0};
             t1=(struct timeval){0};
             printf("\nif get in\n");
             sendto(client_socket, "RTT_INIT", sizeof("RTT_INIT"), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
             gettimeofday(&t0, 0);
         }
-        n=ACK_rcv();
+      //  n=ACK_rcv();
         if(n==1) {
             gettimeofday(&t1, 0);
             RTT = timedifference_msec(t0, t1);
-            RTO =  RTT+DELTA*RTT;
+            RTO =  RTT+network_params.DELTA*RTT;
             DEV=0;
             printf("RTT was init to %f milliseconds.\n", RTT);
             printf("RTO was init to %f milliseconds.\n", RTO);
             printf("Updating server...\n");
-            for(int i=0;i<NUM_OF_TRY;i++) {
+            for(int i=0;i<network_params.NUM_OF_TRY;i++) {
                 sendto(client_socket, &RTT, sizeof(RTT), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
-                k = ACK_rcv();
+              //  k = ACK_rcv();
                 if (k != -1) { return(1); }
             }
             printf("Updating operation fai  led! server not respond!!\n");
@@ -244,7 +222,7 @@ int NETWORK_PARAMS_INIT(){
         }
         num_of_try++;
     }
-    if(num_of_try ==NUM_OF_TRY){
+    if(num_of_try ==network_params.NUM_OF_TRY){
         printf("Failed to init RTT,server not respond!");
         exit(1);
     }
@@ -273,10 +251,10 @@ int RTT_init_respond() {
 }
 void Update_Net_Params(float SAMPLE_RTT)
 {
-    if(SAMPLE_RTT<=MAX_ALLOW_RTT) {
-        RTT = ALPHA * RTT + (1 - ALPHA) * SAMPLE_RTT;
-        DEV = DEV + BETA * (abs((SAMPLE_RTT - RTT)) - DEV);
-        RTO = RTT + GAMMA * DEV;
+    if(SAMPLE_RTT<=network_params.MAX_ALLOW_RTT) {
+        RTT = network_params.ALPHA * RTT + (1 - network_params.ALPHA) * SAMPLE_RTT;
+        DEV = DEV + network_params.BETA * (abs((SAMPLE_RTT - RTT)) - DEV);
+        RTO = RTT + network_params.GAMMA * DEV;
     }
 }
 void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_for_sequence_select)
@@ -295,12 +273,14 @@ void * sender_routine(void* arg)
     int c_len=sizeof(cliaddr);
     int sequence_number=(-1);
     int sqe_sender_arr[2];
-    struct sm_msg_arr arr[11];
+    struct sm_msg_arr  * arr= malloc(sizeof(struct sm_msg_arr)*client_server_params.window_size);
+    for(int i;i<client_server_params.window_size;i++)
+        arr[i].msg_arr=malloc(sizeof(struct sm_msg)*client_server_params.smp_msg_arr_size);
 
     while(1)
     {
-        sequence_number_select(&sequence_number,5,TIME_TO_WAIT_FOR_WINDOW);
-        message_encapsulation((struct sm_msg_arr *)&arr[sequence_number], 10, sequence_number,sqe_sender_arr);
+        sequence_number_select(&sequence_number,client_server_params.window_size+1,TIME_TO_WAIT_FOR_WINDOW);
+        message_encapsulation((struct sm_msg_arr *)&arr[sequence_number], client_server_params.smp_msg_arr_size, sequence_number,sqe_sender_arr);
 
         //gettimeofday(arg, 0);
 
@@ -382,4 +362,83 @@ void * receiver_routine(struct timeval t0) {
         }
     }
 }
+void init_params(char *file_name)
+{
+    int j;
+    char str[50];
+    char c;
+    int counter=-1;
+    char line[75];
+    FILE* config_file;
+    config_file = fopen(file_name, "r");
+    if (!config_file)
+    {
+        perror("fopen to read config_file.txt failed!\n");
+        exit(EXIT_FAILURE);
+    }
+    while (( c = getc(config_file)) != EOF)
+    {
+        fgets(line, 75, config_file);
+        for(int i=0;i<75;i++)
+        {
+            if (line[i] == ':')
+            {
+                for(int k=0;k<50;k++)
+                    str[k]='\0';
+                counter++;
+                j=0;
+                while(line[i+1]!='\n')
+                {
+                    str[j] = line[i + 1];
+                    i++;
+                    j++;
+                }
+                switch (counter)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        network_params.CLIENT_PORT= atoi(str);
+                        break;
+                    case 2:
+                        strcpy(network_params.CLIENT_IP,str);
+                        break;
+                    case 3:
+                        network_params.SERVER_PORT= atoi(str);
+                        break;
+                    case 4:
+                        strcpy(network_params.CLIENT_IP,str);
+                        break;
+                    case 5:
+                        network_params.bandwidth= atoi(str);
+                        break;
+                    case 6:
+                        network_params.NUM_OF_TRY= atoi(str);
+                        break;
+                    case 7:
+                        network_params.INIT_TIME_OUT= atof(str);
+                        break;
+                    case 8:
+                        network_params.MAX_ALLOW_RTT= atof(str);
+                        break;
+                    case 9:
+                        network_params.ALPHA= atof(str);
+                        break;
+                    case 10:
+                        network_params.BETA= atof(str);
+                        break;
+                    case 11:
+                        network_params.GAMMA= atof(str);
+                        break;
+                    case 12:
+                        network_params.DELTA= atof(str);
+                        break;
+                }
+                break;
+            }
+        }
+    }
+    client_server_params.smp_msg_arr_size=(network_params.bandwidth/(8*(MAX_PAYLOAD_SIZE+MAX_TOPIC_SIZE))*0.5);
+    client_server_params.window_size=network_params.bandwidth/(8*(MAX_PAYLOAD_SIZE+MAX_TOPIC_SIZE));
 
+}
