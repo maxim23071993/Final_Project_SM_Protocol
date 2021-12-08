@@ -370,58 +370,61 @@ void * sender_routine(void* arg)
         printf("message queue: done receiving messages.\n");
         system("rm msgq.txt");*/
 }
+void* win_control_thread()
+{
+    float time_diff = 0;
+    char buf[10];
+
+
+    while(1)
+    {
+        for (int i = 0; i <client_server_params.window_size; i++) {
+            gettimeofday(&t1, 0);
+            pthread_mutex_lock(&lock);
+            if (windowcontrol[i].status == 1) {
+                time_diff = timedifference_msec(windowcontrol[i].t, t1);
+                printf("seq.num:%d, time diff:%f\n", windowcontrol[i].seq_num, time_diff);
+            }
+            if (time_diff >= RTO && windowcontrol[i].seq_num!=-1) {
+                printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
+                printf("seq.num:%d,Time diff:%f, RTO:%f, RTT:%f\n",windowcontrol[i].seq_num,time_diff,RTO,RTT);
+                windowcontrol[i].status = -1;
+                windowcontrol[i].t.tv_sec=0;
+                windowcontrol[i].t.tv_usec=0;
+                sprintf(buf, "%d", windowcontrol[i].seq_num);
+                pthread_mutex_unlock(&lock);
+                message_queue_send(buf,SMP_SYSTEM_MESSAGE);
+                printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
+            }
+        }
+    }
+}
 void * receiver_routine(struct timeval t0) {
     int n;
     int s_len = sizeof(servaddr);
     struct timeval tv;
     int ack_seq=1;
     float t;
-    float min_t = 0, time_diff = 0;
-    char buf[10];
     t1 = (struct timeval) {0};
     //gettimeofday(&t1, 0);
    while (1) {
-        pthread_mutex_lock(&lock);
-        for (int i = 0; i < 10; i++) {
-            gettimeofday(&t1, 0);
-            if (windowcontrol[i].status == 1) {
-                time_diff = timedifference_msec(windowcontrol[i].t, t1);
-                printf("seq.num:%d, time diff:%f\n", windowcontrol[i].seq_num, time_diff);
-            }
-                if (time_diff < min_t) {
-                    min_t = time_diff;
-                }
-                if (time_diff >= RTO && windowcontrol[i].seq_num!=-1) {
-                    printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
-                    printf("seq.num:%d,Time diff:%f, RTO:%f, RTT:%f\n",windowcontrol[i].seq_num,time_diff,RTO,RTT);
-                    windowcontrol[i].status = -1;
-                    windowcontrol[i].t.tv_sec=0;
-                    windowcontrol[i].t.tv_usec=0;
-                    sprintf(buf, "%d", windowcontrol[i].seq_num);
-                    message_queue_send(buf,SMP_SYSTEM_MESSAGE);
-                    printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
-                }
-            }
-        pthread_mutex_unlock(&lock);
-        tv.tv_sec = min_t;
-        tv.tv_usec = 0;
-        setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv,sizeof tv); // for non-blocking recvfrom calling
-        n = recvfrom(client_socket, &ack_seq, MAXLINE,SO_RCVTIMEO, (struct sockaddr *) &servaddr,&s_len);
+
+        //tv.tv_sec = min_t;
+        //tv.tv_usec = 0;
+        //setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv,sizeof tv); // for non-blocking recvfrom calling
+        n = recvfrom(client_socket, &ack_seq, MAXLINE,MSG_WAITALL, (struct sockaddr *) &servaddr,&s_len);
         if (n != -1) {
             printf("ACK seq number received: %d\n",ack_seq);
             gettimeofday(&t1, 0);
 
             pthread_mutex_lock(&lock);
-
-            sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, t1)/10;
+            sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, t1);
             printf("RTT sample: %f, RTT:%f,RTO:%f\n",sampled_rtt,RTT,RTO);
             Update_Net_Params(sampled_rtt);
-
             windowcontrol[ack_seq].status = -1;
             windowcontrol[ack_seq].seq_num = -1;
             windowcontrol[ack_seq].t.tv_sec = 0;
             windowcontrol[ack_seq].t.tv_usec = 0;
-
             pthread_mutex_unlock(&lock);
 
         }
