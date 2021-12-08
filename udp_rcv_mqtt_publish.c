@@ -51,6 +51,8 @@ int main()
     int c_len=sizeof(cliaddr);
     int n;
     struct sm_msg_arr  message;
+    char file_name[100]={"//home//max//Desktop//MQTT Subscribe+msg_que+udp_git//SMP_PARAMS.txt"};
+    init_params(file_name);
     //message.msg_arr=(struct sm_msg *)malloc(sizeof(struct sm_msg));
     //message=(struct sm_msg *)malloc(sizeof(struct sm_msg));
     udp_init_server();

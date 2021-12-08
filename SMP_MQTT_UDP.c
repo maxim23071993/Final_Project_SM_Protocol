@@ -149,7 +149,7 @@ void client_sockets_creation()
 
     //Filling server information
     cliaddr.sin_family = AF_INET; // IPv4
-    cliaddr.sin_addr.s_addr = /*inet_addr(CLIENT_IP);*/INADDR_ANY;
+    cliaddr.sin_addr.s_addr = INADDR_ANY;
     cliaddr.sin_port = htons(CLIENT_PORT);
 
 
@@ -166,7 +166,7 @@ void client_sockets_creation()
     memset(&servaddr, 0, sizeof(servaddr));
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = /*inet_addr(SERVER_IP);;*/INADDR_ANY;
+    servaddr.sin_addr.s_addr = inet_addr(network_params.SERVER_IP);;//*/INADDR_ANY;
     servaddr.sin_port = htons(SERVER_PORT);
     printf("UDP send socket created\n");
 
@@ -189,7 +189,7 @@ void server_sockets_creation()
 
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = INADDR_ANY;//*/inet_addr("192.168.1.117");
+    servaddr.sin_addr.s_addr = INADDR_ANY;
     servaddr.sin_port = htons(SERVER_PORT);
 
     // Bind the socket with the server address
@@ -202,7 +202,7 @@ void server_sockets_creation()
 
     memset(&cliaddr, 0, sizeof(cliaddr));
     cliaddr.sin_family = AF_INET; // IPv4
-    cliaddr.sin_addr.s_addr = INADDR_ANY;//*/inet_addr("192.168.1.113");
+    cliaddr.sin_addr.s_addr = /*INADDR_ANY;//*/inet_addr(network_params.CLIENT_IP);
     cliaddr.sin_port = htons(CLIENT_PORT);
     printf("UDP send socket created\n");
 
