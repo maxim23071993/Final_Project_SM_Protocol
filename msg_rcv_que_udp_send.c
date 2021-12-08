@@ -4,14 +4,16 @@
         char c;
         char file_name[100]={"//home//max//Desktop//MQTT Subscribe+msg_que+udp_git//SMP_PARAMS.txt"};
         init_params(file_name);
+        struct window_control * windowc_ontrol=malloc(client_server_params.window_size*(sizeof(struct window_control)));
+        windowcontrol=windowc_ontrol;
         pthread_t sender_thread,receiver_thread;
         pthread_mutex_init(&lock,NULL);
         //msg_que_create("msgq"); ///
-        msg_rcv_init(&msqid_global,"msgq");
+        msg_rcv_init(&msqid_global,"incapsulation_debug");
         udp_init_client();
         t0=(struct timeval){0};
         gettimeofday(&t0, 0);
-        for(int i=0;i<10;i++)
+        for(int i=0;i<client_server_params.window_size;i++)
         {
             windowcontrol[i].status=-1;
             windowcontrol[i].seq_num=-1;

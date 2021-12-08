@@ -21,6 +21,7 @@
 #include <sys/time.h>
 #include <sys/select.h>
 #include <arpa/inet.h>
+#include <inttypes.h>
 /*####################################################################################################################*/
 //MQTT defines and global variables
 #define ADDRESS     "tcp://localhost:1883"
@@ -40,9 +41,9 @@ float RTT_SERVER;
 float RTO_SERVER;
 float sampled_rtt;
 struct smp_network_params{
-    int CLIENT_PORT;
+    int client_port;
     char CLIENT_IP[15];
-    int SERVER_PORT;
+    int server_port;
     char SERVER_IP[15];
     int bandwidth;
     int NUM_OF_TRY;//connection retransmission number
@@ -68,6 +69,8 @@ int msqid_global;
 pthread_mutex_t lock;
 /*####################################################################################################################*/
 //UDP defines and global variables
+#define CLIENT_PORT 8080
+#define SERVER_PORT 8081
 #define MAXLINE 1024
 #define TIME_TO_WAIT_FOR_WINDOW 100 // useconds
 

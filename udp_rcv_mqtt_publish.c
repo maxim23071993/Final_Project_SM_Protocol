@@ -59,8 +59,7 @@ int main()
     {
         n=recvfrom(server_socket, &message, sizeof(struct sm_msg_arr), MSG_WAITALL, (struct sockaddr *) &cliaddr, &c_len);
         if(n!=-1) {
-            sendto(server_socket, &message.sq_number, sizeof(int), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,
-                   c_len);
+            sendto(server_socket, &message.sq_number, sizeof(int), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
             printf("\n############################   %d   ####################################\n", message.sq_number);
             printf("ACK on message seq %d was sent to client\n", message.sq_number);
             for (int i = 0; i < message.arr_size; i++)

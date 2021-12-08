@@ -116,7 +116,7 @@ void client_sockets_creation()
     //Filling server information
     cliaddr.sin_family = AF_INET; // IPv4
     cliaddr.sin_addr.s_addr = /*inet_addr(CLIENT_IP);*/INADDR_ANY;
-    cliaddr.sin_port = htons(network_params.CLIENT_PORT);
+    cliaddr.sin_port = htons(CLIENT_PORT);
 
 
     // Bind the socket with the server address
@@ -133,7 +133,7 @@ void client_sockets_creation()
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
     servaddr.sin_addr.s_addr = /*inet_addr(SERVER_IP);;*/INADDR_ANY;
-    servaddr.sin_port = htons(network_params.SERVER_PORT);
+    servaddr.sin_port = htons(SERVER_PORT);
     printf("UDP send socket created\n");
 
 }
@@ -156,7 +156,7 @@ void server_sockets_creation()
     //Filling server information
     servaddr.sin_family = AF_INET; // IPv4
     servaddr.sin_addr.s_addr = INADDR_ANY;//*/inet_addr("192.168.1.117");
-    servaddr.sin_port = htons(network_params.SERVER_PORT);
+    servaddr.sin_port = htons(SERVER_PORT);
 
     // Bind the socket with the server address
     if (bind(server_socket, (const struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
@@ -169,7 +169,7 @@ void server_sockets_creation()
     memset(&cliaddr, 0, sizeof(cliaddr));
     cliaddr.sin_family = AF_INET; // IPv4
     cliaddr.sin_addr.s_addr = INADDR_ANY;//*/inet_addr("192.168.1.113");
-    cliaddr.sin_port = htons(network_params.CLIENT_PORT);
+    cliaddr.sin_port = htons(CLIENT_PORT);
     printf("UDP send socket created\n");
 
 }
@@ -427,13 +427,13 @@ void init_params(char *file_name)
                     case 0:
                         break;
                     case 1:
-                        network_params.CLIENT_PORT= atoi(str);
+                        network_params.client_port = atoi(str) ;
                         break;
                     case 2:
                         strcpy(network_params.CLIENT_IP,str);
                         break;
                     case 3:
-                        network_params.SERVER_PORT= atoi(str);
+                        network_params.server_port = atoi(str);
                         break;
                     case 4:
                         strcpy(network_params.SERVER_IP,str);
