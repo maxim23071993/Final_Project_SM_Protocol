@@ -1,5 +1,5 @@
 #include "SMP_MQTT_UDP.h"
-    int main()
+    int main(int argc,void **argv)
     {
         char c;
         char file_name[100]={"//home//max//Desktop//MQTT Subscribe+msg_que+udp_git//SMP_PARAMS.txt"};

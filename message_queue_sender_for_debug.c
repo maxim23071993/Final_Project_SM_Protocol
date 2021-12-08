@@ -16,7 +16,7 @@ void main(int argc,void *argv)
     //msg_rcv_init(&msqid,"msgq");
     int sqe_arr[2];
 
-   for( i=0;i<100;i++)
+   for( i=0;i<150;i++)
     {
         message_queue_send("topic","payload");
     }

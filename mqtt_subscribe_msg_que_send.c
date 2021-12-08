@@ -32,7 +32,7 @@ void connlost(void *context, char *cause)
     printf("     cause: %s\n", cause);
 }
 
-void main(int argc,void **argv)
+int main(int argc,void **argv)
 {
 
     MQTTClient client;
@@ -41,9 +41,9 @@ void main(int argc,void **argv)
     int rc;
     int ch;
     char  topic[20];
-    init_params(file_name);
-    struct window_control  * win_control= (struct window_control *)malloc(sizeof(struct window_control )*client_server_params.window_size);
-    windowcontrol=win_control;
+   // init_params(file_name);
+  //  struct window_control  * win_control= (struct window_control *)malloc(sizeof(struct window_control )*client_server_params.window_size);
+   // windowcontrol=win_control;
     msg_que_create("msgq");
     if(fork()==0){
         system("./msg_rcv_que_udp_send");

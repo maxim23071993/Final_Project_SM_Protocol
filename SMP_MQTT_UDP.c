@@ -111,7 +111,7 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
     sqe_send_arr[0]=-1;
     sqe_send_arr[1]=-1;
     arr->sq_number = sqe_number;
-    sqe_send_arr[1]=sqe_number;
+
     while(1)
     {
         read_from_message_queue(&message,msqid_global);
@@ -127,12 +127,14 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
                 strcpy(arr->msg_arr[arr->arr_size].topic,message.topic);
                 (arr->arr_size)++;
                 msgctl(msqid_global, IPC_STAT, &buf);
-                if((arr->arr_size)==(data_arr_size) || buf.msg_qnum==0)
+                if((arr->arr_size)==(data_arr_size) || buf.msg_qnum==0){
+                    sqe_send_arr[1]=sqe_number;
                     return;
                 }
         }
 
     }
+}
 
 /*####################################################################################################################*/
 //udp
@@ -425,83 +427,76 @@ void * receiver_routine(struct timeval t0) {
         }
     }
 }
-void init_params(char *file_name)
-{
+void init_params(char *file_name) {
     int j;
     char str[50];
     char c;
-    int counter=-1;
+    int counter = -1;
     char line[75];
-    FILE* config_file;
+    FILE *config_file;
     config_file = fopen(file_name, "r");
-    if (!config_file)
-    {
+    if (!config_file) {
         perror("fopen to read config_file.txt failed!\n");
         exit(EXIT_FAILURE);
     }
-    while (( c = getc(config_file)) != EOF)
-    {
+    while ((c = getc(config_file)) != EOF) {
         fgets(line, 75, config_file);
-        for(int i=0;i<75;i++)
-        {
-            if (line[i] == ':')
-            {
-                for(int k=0;k<50;k++)
-                    str[k]='\0';
+        for (int i = 0; i < 75; i++) {
+            if (line[i] == ':') {
+                for (int k = 0; k < 50; k++)
+                    str[k] = '\0';
                 counter++;
-                j=0;
-                while(line[i+1]!='\n')
-                {
+                j = 0;
+                while (line[i + 1] != '\n') {
                     str[j] = line[i + 1];
                     i++;
                     j++;
                 }
-                switch (counter)
-                {
+                switch (counter) {
                     case 0:
                         break;
                     case 1:
-                        network_params.client_port = atoi(str) ;
+                        network_params.client_port = atoi(str);
                         break;
                     case 2:
-                        strcpy(network_params.CLIENT_IP,str);
+                        strcpy(network_params.CLIENT_IP, str);
                         break;
                     case 3:
                         network_params.server_port = atoi(str);
                         break;
                     case 4:
-                        strcpy(network_params.SERVER_IP,str);
+                        strcpy(network_params.SERVER_IP, str);
                         break;
                     case 5:
-                        network_params.bandwidth= atoi(str);
+                        network_params.bandwidth = atoi(str);
                         break;
                     case 6:
-                        network_params.NUM_OF_TRY= atoi(str);
+                        network_params.NUM_OF_TRY = atoi(str);
                         break;
                     case 7:
-                        network_params.INIT_TIME_OUT= atof(str);
+                        network_params.INIT_TIME_OUT = atof(str);
                         break;
                     case 8:
-                        network_params.MAX_ALLOW_RTT= atof(str);
+                        network_params.MAX_ALLOW_RTT = atof(str);
                         break;
                     case 9:
-                        network_params.ALPHA= atof(str);
+                        network_params.ALPHA = atof(str);
                         break;
                     case 10:
-                        network_params.BETA= atof(str);
+                        network_params.BETA = atof(str);
                         break;
                     case 11:
-                        network_params.GAMMA= atof(str);
+                        network_params.GAMMA = atof(str);
                         break;
                     case 12:
-                        network_params.DELTA= atof(str);
+                        network_params.DELTA = atof(str);
                         break;
                 }
                 break;
             }
         }
     }
-    client_server_params.smp_msg_arr_size=(network_params.bandwidth/(8*(MAX_PAYLOAD_SIZE+MAX_TOPIC_SIZE))*0.5);
-    client_server_params.window_size=network_params.bandwidth/(8*(MAX_PAYLOAD_SIZE+MAX_TOPIC_SIZE));
-
+    client_server_params.smp_msg_arr_size = (network_params.bandwidth / (8 * (MAX_PAYLOAD_SIZE + MAX_TOPIC_SIZE)) *0.5);
+    client_server_params.window_size = network_params.bandwidth / (8 * (MAX_PAYLOAD_SIZE + MAX_TOPIC_SIZE));
 }
+
