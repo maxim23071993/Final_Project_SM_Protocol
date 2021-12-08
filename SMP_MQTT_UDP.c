@@ -382,7 +382,7 @@ void * receiver_routine(struct timeval t0) {
     //gettimeofday(&t1, 0);
    while (1) {
         pthread_mutex_lock(&lock);
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < client_server_params.window_size; i++) {
             gettimeofday(&t1, 0);
             if (windowcontrol[i].status == 1) {
                 time_diff = timedifference_msec(windowcontrol[i].t, t1);
