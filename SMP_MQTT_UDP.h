@@ -58,8 +58,8 @@ struct smp_network_params network_params;
 /*####################################################################################################################*/
 //message queue defines and global variables
 #define PERMS 0644
-#define MAX_PAYLOAD_SIZE 30
-#define MAX_TOPIC_SIZE 20
+#define MAX_PAYLOAD_SIZE 50
+#define MAX_TOPIC_SIZE 50
 #define SMP_SYSTEM_MESSAGE "SMP SYS MSG"
 struct sm_msg {
     char topic[MAX_TOPIC_SIZE];
@@ -85,7 +85,7 @@ int server_socket;
 struct sockaddr_in servaddr,cliaddr;
 
 struct sm_msg_arr{
-    struct sm_msg  *msg_arr;
+    struct sm_msg * msg_arr;
     int arr_size;
     int sq_number;
 };

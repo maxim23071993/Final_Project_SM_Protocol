@@ -70,7 +70,7 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
 
     struct msqid_ds buf;
     struct sm_msg message;
-    int message_compare;
+
     /*int num_messages;
     int rc;
     int msqid;
@@ -78,25 +78,24 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
     num_messages = buf.msg_qnum;*/
     arr->arr_size=0;
     sqe_send_arr[0]=-1;
-    sqe_send_arr[1]=-1;
-    arr->sq_number = sqe_number;
     sqe_send_arr[1]=sqe_number;
+    arr->sq_number = sqe_number;
+
     while(1)
     {
         read_from_message_queue(&message,msqid_global);
-        message_compare=strcmp(SMP_SYSTEM_MESSAGE,message.topic);
-        switch(message_compare)
+        switch(strcmp(SMP_SYSTEM_MESSAGE,message.topic))
         {
             case 0:
                 sqe_send_arr[0]=atoi(message.payload);
               // break;
                 return;
             default:
-              strcpy(arr->msg_arr[arr->arr_size].payload,message.payload);
-              strcpy(arr->msg_arr[arr->arr_size].topic,message.topic);
-                (arr->arr_size)++;
-                msgctl(msqid_global, IPC_STAT, &buf);
-              if((arr->arr_size)==data_arr_size || buf.msg_qnum==0)
+               strcpy(arr->msg_arr[arr->arr_size].payload,message.payload);
+               strcpy(arr->msg_arr[arr->arr_size].topic,message.topic);
+               (arr->arr_size)++;
+               msgctl(msqid_global, IPC_STAT, &buf);
+               if((arr->arr_size)==(data_arr_size) || buf.msg_qnum==0)
                   return;
         }
 
@@ -305,11 +304,13 @@ void * sender_routine(void* arg)
     struct sm_msg_arr  * arr= malloc(sizeof(struct sm_msg_arr)*client_server_params.window_size);
     for(int i;i<client_server_params.window_size;i++)
         arr[i].msg_arr=malloc(sizeof(struct sm_msg)*client_server_params.smp_msg_arr_size);
+    //struct sm_msg_arr   arr[11];
+
 
     while(1)
     {
-        sequence_number_select(&sequence_number,client_server_params.window_size+1,TIME_TO_WAIT_FOR_WINDOW);
-        message_encapsulation((struct sm_msg_arr *)&arr[sequence_number], client_server_params.smp_msg_arr_size, sequence_number,sqe_sender_arr);
+        sequence_number_select(&sequence_number,client_server_params.window_size,TIME_TO_WAIT_FOR_WINDOW);
+        message_encapsulation(&(arr[sequence_number]), client_server_params.smp_msg_arr_size, sequence_number,sqe_sender_arr);
 
         //gettimeofday(arg, 0);
 
