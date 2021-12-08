@@ -192,7 +192,7 @@ int NETWORK_PARAMS_INIT(){
 
 
     struct timeval tv;
-    tv.tv_sec = INIT_TIME_OUT;
+    tv.tv_sec = network_params.INIT_TIME_OUT;
     tv.tv_usec = 0;
    setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
     gettimeofday(&t0, 0);
@@ -219,7 +219,7 @@ int NETWORK_PARAMS_INIT(){
             printf("RTT was init to %f milliseconds.\n", RTT);
             printf("RTO was init to %f milliseconds.\n", RTO);
             printf("Sending params to server...\n");
-            for(int i=0;i<NUM_OF_TRY;i++) {
+            for(int i=0;i<network_params.NUM_OF_TRY;i++) {
                 sendto(client_socket, &client_server_params, sizeof(client_server_params), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
                 //k = ACK_rcv();
                 k = recvfrom(client_socket, (char *)msg, MAXLINE,SO_RCVTIMEO, (struct sockaddr *) &servaddr,&s_len);
@@ -267,7 +267,7 @@ void server_init_respond() {
                     RTT_SERVER=tmp.rtt;
                     RTO_SERVER=tmp.rto;
                     printf("RTT_SERVER was init to %f millisecond...\n", RTT_SERVER);
-                    printf("RTT_SERVER was init to %f millisecond...\n", RTT_SERVER);
+                    printf("RTO_SERVER was init to %f millisecond...\n", RTO_SERVER);
 
                 }
                 sendto(server_socket, (const char *) RTT_ack, sizeof(RTT_ack), MSG_CONFIRM,
@@ -280,9 +280,9 @@ void server_init_respond() {
 }
 void Update_Net_Params(float SAMPLE_RTT)
 {
-    if(SAMPLE_RTT<=MAX_ALLOW_RTT) {  // filter for faulty RTT measurements.
-        RTT = (1-ALPHA)*RTT+ ALPHA * SAMPLE_RTT;
-        DEV = DEV*(1-BETA)+BETA*(abs((SAMPLE_RTT - RTT)));
+    if(SAMPLE_RTT<=network_params.MAX_ALLOW_RTT) {  // filter for faulty RTT measurements.
+        RTT = (1-network_params.ALPHA)*RTT+ network_params.ALPHA * SAMPLE_RTT;
+        DEV = DEV*(1-network_params.BETA)+network_params.BETA*(abs((SAMPLE_RTT - RTT)));
         RTO = RTT + 4*abs(DEV);
     }
 }
@@ -436,7 +436,7 @@ void init_params(char *file_name)
                         network_params.SERVER_PORT= atoi(str);
                         break;
                     case 4:
-                        strcpy(network_params.CLIENT_IP,str);
+                        strcpy(network_params.SERVER_IP,str);
                         break;
                     case 5:
                         network_params.bandwidth= atoi(str);

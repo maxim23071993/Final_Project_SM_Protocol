@@ -3,7 +3,7 @@
 //
 #include "SMP_MQTT_UDP.h"
 #include <stdlib.h>
-void main(int argc,void *argv)
+void main1(int argc,void *argv)
 {
     char file_name[100]={"//home//max//Desktop//MQTT Subscribe+msg_que+udp_git//SMP_PARAMS.txt"};
     /*int i;
