@@ -68,14 +68,14 @@ void read_from_message_queue(struct sm_msg *message,int msqid){
 void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_number,int * sqe_send_arr)
 {
 
-    struct msqid_ds buf;
+    /*struct msqid_ds buf;
     struct sm_msg message;
 
     /*int num_messages;
     int rc;
     int msqid;
     rc = msgctl(msqid_global, IPC_STAT, &buf);
-    num_messages = buf.msg_qnum;*/
+    num_messages = buf.msg_qnum;
     arr->arr_size=0;
     sqe_send_arr[0]=-1;
     sqe_send_arr[1]=sqe_number;
@@ -99,8 +99,41 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
                   return;
         }
 
+    }*/
+    struct msqid_ds buf;
+    struct sm_msg message;
+    int message_compare;
+    char string[]={"SMP SYS MSG"};
+    /*int num_messages;
+    rc = msgctl(msqid_global, IPC_STAT, &buf);
+    num_messages = buf.msg_qnum;*/
+    arr->arr_size=0;
+    sqe_send_arr[0]=-1;
+    sqe_send_arr[1]=-1;
+    arr->sq_number = sqe_number;
+    sqe_send_arr[1]=sqe_number;
+    while(1)
+    {
+        read_from_message_queue(&message,msqid_global);
+        switch(strcmp(SMP_SYSTEM_MESSAGE,message.topic))
+        {
+            case 0:
+                sqe_send_arr[0]=atoi(message.payload);
+                return;
+
+                // operator doesn't match any case constant +, -, *, /
+            default:
+                strcpy(arr->msg_arr[arr->arr_size].payload,message.payload);
+                strcpy(arr->msg_arr[arr->arr_size].topic,message.topic);
+                (arr->arr_size)++;
+                msgctl(msqid_global, IPC_STAT, &buf);
+                if((arr->arr_size)==(data_arr_size) || buf.msg_qnum==0)
+                    return;
+                }
+        }
+
     }
-}
+
 /*####################################################################################################################*/
 //udp
 void client_sockets_creation()
@@ -302,8 +335,8 @@ void * sender_routine(void* arg)
     int sequence_number=(-1);
     int sqe_sender_arr[2];
     struct sm_msg_arr  * arr= malloc(sizeof(struct sm_msg_arr)*client_server_params.window_size);
-    for(int i;i<client_server_params.window_size;i++)
-        arr[i].msg_arr=malloc(sizeof(struct sm_msg)*client_server_params.smp_msg_arr_size);
+   // for(int i;i<client_server_params.window_size;i++)
+     //   arr[i].msg_arr=malloc(sizeof(struct sm_msg)*client_server_params.smp_msg_arr_size);
     //struct sm_msg_arr   arr[11];
 
 

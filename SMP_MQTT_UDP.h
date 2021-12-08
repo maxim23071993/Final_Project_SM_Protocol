@@ -60,6 +60,7 @@ struct smp_network_params network_params;
 #define PERMS 0644
 #define MAX_PAYLOAD_SIZE 50
 #define MAX_TOPIC_SIZE 50
+#define MAX_NUM_OF_MESSAGE (30000/(MAX_TOPIC_SIZE+MAX_PAYLOAD_SIZE))
 #define SMP_SYSTEM_MESSAGE "SMP SYS MSG"
 struct sm_msg {
     char topic[MAX_TOPIC_SIZE];
@@ -85,7 +86,7 @@ int server_socket;
 struct sockaddr_in servaddr,cliaddr;
 
 struct sm_msg_arr{
-    struct sm_msg * msg_arr;
+    struct sm_msg  msg_arr[MAX_NUM_OF_MESSAGE];
     int arr_size;
     int sq_number;
 };
