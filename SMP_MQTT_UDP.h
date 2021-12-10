@@ -31,14 +31,12 @@
 #define QOS         1
 #define TIMEOUT     10000L
 /*####################################################################################################################*/
-//RTT and RTO estimation defines and global variables
+//RTT, RTO and network parameters estimation and defines
 struct timeval t0;
 struct timeval t1;
 float RTT;
 float RTO;
 float DEV;
-float RTT_SERVER;
-float RTO_SERVER;
 float sampled_rtt;
 
 struct smp_network_params{
@@ -54,38 +52,34 @@ struct smp_network_params{
     float BETA;
     float GAMMA;
     float DELTA;
+    int typical_rtt;
 };
 struct smp_network_params network_params;
 /*####################################################################################################################*/
 //message queue defines and global variables
 #define PERMS 0644
-#define MAX_PAYLOAD_SIZE 50
-#define MAX_TOPIC_SIZE 50
+#define MAX_PAYLOAD_SIZE 30
+#define MAX_TOPIC_SIZE 20
 #define MAX_NUM_OF_MESSAGE (30000/(MAX_TOPIC_SIZE+MAX_PAYLOAD_SIZE))
 #define SMP_SYSTEM_MESSAGE "SMP SYS MSG"
-struct sm_msg {
-    char topic[MAX_TOPIC_SIZE];
-    char payload[MAX_PAYLOAD_SIZE];
-};
+
 int msqid_global;
 pthread_mutex_t lock;
 /*####################################################################################################################*/
 //UDP defines and global variables
 #define CLIENT_PORT 8080
 #define SERVER_PORT 8081
-#define MAXLINE 1024
 #define TIME_TO_WAIT_FOR_WINDOW 100 // useconds
-
-//#define UDP_BANDWIDTH 100000 //100 kbps //+
-//#define MAX_UDP_PACKET (UDP_BANDWIDTH/8)
-//#define SM_MSG_MAX_ARR_SIZE (MAX_UDP_PACKET/70)
 
 int client_socket;
 int server_socket;
-//int window_size;
 
 struct sockaddr_in servaddr,cliaddr;
 
+struct sm_msg {
+    char topic[MAX_TOPIC_SIZE];
+    char payload[MAX_PAYLOAD_SIZE];
+};
 struct sm_msg_arr{
     struct sm_msg  msg_arr[MAX_NUM_OF_MESSAGE];
     int arr_size;
@@ -118,14 +112,14 @@ void client_sockets_creation();
 void server_sockets_creation();
 int NETWORK_PARAMS_INIT();
 void udp_init_client();
-int udp_init_server();
+void udp_init_server();
 void server_init_respond();
 void Update_Net_Params(float SAMPLE_RTT);
 void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_for_sequence_select);
+void init_params(char *file_name);
 /*####################################################################################################################*/
 //Thread routine
 void * sender_routine();
 void * receiver_routine();
-void init_params(char *file_name);
-
+void * win_control_thread();
 #endif //MQTT_CLIENTS_SMP_MQTT_UDP_H

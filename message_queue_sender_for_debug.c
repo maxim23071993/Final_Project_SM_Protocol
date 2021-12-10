@@ -1,11 +1,11 @@
 //
-// Created by max on 22/10/2021.
+// Created by Maxim & Shlomi on 24/08/2021.
 //
 #include "SMP_MQTT_UDP.h"
 #include <stdlib.h>
 void main(int argc,void *argv)
 {
-    char file_name[100]={"//home//shlomi//Desktop//MQTT Subscribe+msg_que+udp_git//SMP_PARAMS.txt"};
+    char file_name[100]={"//home//max//Desktop//MQTT Subscribe+msg_que+udp_git//SMP_PARAMS.txt"};
     int i;
     int msqid;
     char topic[10];
