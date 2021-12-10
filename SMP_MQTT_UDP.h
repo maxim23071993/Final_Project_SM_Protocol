@@ -117,6 +117,8 @@ void server_init_respond();
 void Update_Net_Params(float SAMPLE_RTT);
 void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_for_sequence_select);
 void init_params(char *file_name);
+float timedifference_msec(struct timeval x, struct timeval y);
+
 /*####################################################################################################################*/
 //Thread routine
 void * sender_routine();

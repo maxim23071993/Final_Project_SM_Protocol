@@ -180,10 +180,35 @@ void udp_init_server()
     server_init_respond();
 }
 //RTT and RTO estimation
-float timedifference_msec(struct timeval t0, struct timeval t1)
+float timedifference_msec(struct timeval y, struct timeval x)
 {
-    return (t1.tv_sec - t0.tv_sec) * 1000.0f + (t1.tv_usec - t0.tv_usec) / 1000.0f;
+    //return (t1.tv_sec - t0.tv_sec) * 1000.0f + (t1.tv_usec - t0.tv_usec) / 1000.0f;
+    struct timeval result;
+    {
+        /* Perform the carry for the later subtraction by updating y. */
+        if (x.tv_usec < y.tv_usec) {
+            int nsec = (y.tv_usec - x.tv_usec) / 1000000 + 1;
+            y.tv_usec -= 1000000 * nsec;
+            y.tv_sec += nsec;
+        }
+        if (x.tv_usec - y.tv_usec > 1000000) {
+            int nsec = (y.tv_usec - x.tv_usec) / 1000000;
+            y.tv_usec += 1000000 * nsec;
+            y.tv_sec -= nsec;
+        }
+
+        /* Compute the time remaining to wait.
+           tv_usec is certainly positive. */
+        result.tv_sec = x.tv_sec - y.tv_sec;
+        result.tv_usec = x.tv_usec - y.tv_usec;
+
+        /* Return 1 if result is negative. */
+        return (result.tv_sec * 1000.0f + result.tv_usec / 1000.0f);
+
+    }
+
 }
+
 int NETWORK_PARAMS_INIT(){
     //int c_len=sizeof(cliaddr);
     int s_len=sizeof(servaddr);
@@ -417,8 +442,8 @@ void* win_control_routine(struct timeval t0)
     while(1)
     {
         for (int i = 0; i <client_server_params.window_size; i++) {
-            gettimeofday(&t1, 0);
             pthread_mutex_lock(&lock);
+            gettimeofday(&t1, 0);
             if (windowcontrol[i].status == 1) {
                 time_diff = timedifference_msec(windowcontrol[i].t, t1);
              //   printf("seq.num:%d, time diff:%f\n", windowcontrol[i].seq_num, time_diff);
@@ -455,10 +480,13 @@ void * receiver_routine(struct timeval t0) {
        n = recvfrom(client_socket, &ack_seq, sizeof(int),MSG_WAITALL, (struct sockaddr *) &servaddr,&s_len);
         if (n != -1) {
             printf("ACK seq number received: %d\n",ack_seq);
-            gettimeofday(&t1, 0);
+           // gettimeofday(&t1, 0);
 
             pthread_mutex_lock(&lock);
+            gettimeofday(&t1, 0);
             sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, t1);
+            if(sampled_rtt>1)
+                printf("win_control:%d,timediff %f\n",ack_seq,windowcontrol[ack_seq].t.tv_usec);
             printf("RTT sample: %f, RTT:%f,RTO:%f\n",sampled_rtt,RTT,RTO);
             Update_Net_Params(sampled_rtt);
             windowcontrol[ack_seq].status = -1;
