@@ -121,5 +121,7 @@ void init_params(char *file_name);
 //Thread routine
 void * sender_routine();
 void * receiver_routine();
+void* win_control_routine();
+
 void * win_control_thread();
 #endif //MQTT_CLIENTS_SMP_MQTT_UDP_H

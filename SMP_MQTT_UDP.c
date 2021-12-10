@@ -68,42 +68,10 @@ void read_from_message_queue(struct sm_msg *message,int msqid){
 void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_number,int * sqe_send_arr)
 {
 
-    /*struct msqid_ds buf;
-   struct sm_msg message;
 
-   /*int num_messages;
-   int rc;
-   int msqid;
-   rc = msgctl(msqid_global, IPC_STAT, &buf);
-   num_messages = buf.msg_qnum;
-   arr->arr_size=0;
-   sqe_send_arr[0]=-1;
-   sqe_send_arr[1]=sqe_number;
-   arr->sq_number = sqe_number;
-
-   while(1)
-   {
-       read_from_message_queue(&message,msqid_global);
-       switch(strcmp(SMP_SYSTEM_MESSAGE,message.topic))
-       {
-           case 0:
-               sqe_send_arr[0]=atoi(message.payload);
-             // break;
-               return;
-           default:
-              strcpy(arr->msg_arr[arr->arr_size].payload,message.payload);
-              strcpy(arr->msg_arr[arr->arr_size].topic,message.topic);
-              (arr->arr_size)++;
-              msgctl(msqid_global, IPC_STAT, &buf);
-              if((arr->arr_size)==(data_arr_size) || buf.msg_qnum==0)
-                 return;
-       }
-
-   }*/
     struct msqid_ds buf;
     struct sm_msg message;
-    int message_compare;
-    char string[]={"SMP SYS MSG"};
+    char string[]={"SMP SYS MSG"}; // do not remove!!!!!!!
     /*int num_messages;
     rc = msgctl(msqid_global, IPC_STAT, &buf);
     num_messages = buf.msg_qnum;*/
@@ -312,7 +280,7 @@ void Update_Net_Params(float SAMPLE_RTT)
     if(SAMPLE_RTT<=network_params.MAX_ALLOW_RTT) {  // filter for faulty RTT measurements.
         RTT = (1-network_params.ALPHA)*RTT+ network_params.ALPHA * SAMPLE_RTT;
         DEV = DEV*(1-network_params.BETA)+network_params.BETA*(abs((SAMPLE_RTT - RTT)));
-        RTO = RTT + 4*abs(DEV);
+        RTO = RTT + 15*abs(DEV);
     }
 }
 void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_for_sequence_select)
@@ -418,19 +386,20 @@ void * sender_routine(void* arg)
 
         //gettimeofday(arg, 0);
 
-        pthread_mutex_lock(&lock);
 
         for(int i=0;i<2;i++)
         {
             if(sqe_sender_arr[i]!=(-1))
             {
+                pthread_mutex_lock(&lock);
                 sendto(client_socket, &arr[sqe_sender_arr[i]], sizeof(struct sm_msg_arr), MSG_CONFIRM,(const struct sockaddr *) &servaddr, s_len);
                 windowcontrol[sqe_sender_arr[i]].status = 1;
                 windowcontrol[sqe_sender_arr[i]].seq_num=sequence_number;
                 gettimeofday(&(windowcontrol[sqe_sender_arr[i]].t), 0);
+                pthread_mutex_unlock(&lock);
+
             }
         }
-        pthread_mutex_unlock(&lock);
     }
 
     /*
@@ -439,7 +408,7 @@ void * sender_routine(void* arg)
         printf("message queue: done receiving messages.\n");
         system("rm msgq.txt");*/
 }
-void* win_control_thread()
+void* win_control_routine(struct timeval t0)
 {
     float time_diff = 0;
     char buf[10];
@@ -452,7 +421,7 @@ void* win_control_thread()
             pthread_mutex_lock(&lock);
             if (windowcontrol[i].status == 1) {
                 time_diff = timedifference_msec(windowcontrol[i].t, t1);
-                printf("seq.num:%d, time diff:%f\n", windowcontrol[i].seq_num, time_diff);
+             //   printf("seq.num:%d, time diff:%f\n", windowcontrol[i].seq_num, time_diff);
             }
             if (time_diff >= RTO && windowcontrol[i].seq_num!=-1) {
                 printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
@@ -461,11 +430,13 @@ void* win_control_thread()
                 windowcontrol[i].t.tv_sec=0;
                 windowcontrol[i].t.tv_usec=0;
                 sprintf(buf, "%d", windowcontrol[i].seq_num);
-                pthread_mutex_unlock(&lock);
                 message_queue_send(buf,SMP_SYSTEM_MESSAGE);
                 printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
             }
+            pthread_mutex_unlock(&lock);
+
         }
+
     }
 }
 void * receiver_routine(struct timeval t0) {
