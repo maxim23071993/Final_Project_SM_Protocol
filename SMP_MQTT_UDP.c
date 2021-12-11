@@ -433,39 +433,65 @@ void * sender_routine(void* arg)
         printf("message queue: done receiving messages.\n");
         system("rm msgq.txt");*/
 }
-void* win_control_routine(struct timeval t0)
-{
+void* win_control_routine(struct timeval t0) {
     float time_diff = 0;
     char buf[10];
     struct timeval rt;
 
-    while(1)
-    {
-        for (int i = 0; i <client_server_params.window_size; i++) {
-            if(gettimeofday(&rt, 0)==-1)
-            {
+    while (1) {
+        for (int i = 0; i < client_server_params.window_size; i++) {
+            if (gettimeofday(&rt, 0) == -1) {
                 perror("getimeofday");
             }
             pthread_mutex_lock(&lock);
             if ((windowcontrol[i].status == 1) && (windowcontrol[i].seq_num != -1)) {
                 time_diff = timedifference_msec(windowcontrol[i].t, rt);
                 //   printf("seq.num:%d, time diff:%f\n", windowcontrol[i].seq_num, time_diff);
-                if (time_diff >= RTO  ) {
-                    printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
-                    printf("seq.num:%d,num_of_trys:%d ,Time diff:%f, RTO:%f, RTT:%f\n", windowcontrol[i].seq_num,windowcontrol[i].num_of_trys, time_diff, RTO, RTT);
-                    windowcontrol[i].status = -1;
-                    windowcontrol[i].t.tv_sec = 0;
-                    windowcontrol[i].t.tv_usec = 0;
-                    windowcontrol[i].num_of_trys++;
-                    sprintf(buf, "%d", windowcontrol[i].seq_num);
-                    message_queue_send(buf, SMP_SYSTEM_MESSAGE);
-                    printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
+                switch (windowcontrol[i].num_of_trys) {
+                    case 1:
+                        if (time_diff >= 2 * RTO) {
+                            printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
+                            printf("seq.num:%d,num_of_trys:%d ,Time diff:%f, RTO:%f, RTT:%f\n",
+                                   windowcontrol[i].seq_num, windowcontrol[i].num_of_trys, time_diff, RTO, RTT);
+                            windowcontrol[i].status = -1;
+                            windowcontrol[i].t.tv_sec = 0;
+                            windowcontrol[i].t.tv_usec = 0;
+                            windowcontrol[i].num_of_trys++;
+                            sprintf(buf, "%d", windowcontrol[i].seq_num);
+                            message_queue_send(buf, SMP_SYSTEM_MESSAGE);
+                            printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
+                        }
+                        break;
+                    case 2:
+                        if (time_diff >= 3 * RTO) {
+                            printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
+                            printf("seq.num:%d,num_of_trys:%d ,Time diff:%f, RTO:%f, RTT:%f\n",windowcontrol[i].seq_num, windowcontrol[i].num_of_trys, time_diff, RTO, RTT);
+                            windowcontrol[i].status = -1;
+                            windowcontrol[i].t.tv_sec = 0;
+                            windowcontrol[i].t.tv_usec = 0;
+                            windowcontrol[i].num_of_trys++;
+                            sprintf(buf, "%d", windowcontrol[i].seq_num);
+                            message_queue_send(buf, SMP_SYSTEM_MESSAGE);
+                            printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
+                        }
+                        break;
+                    default:
+                        if (time_diff >= RTO) {
+                            printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
+                            printf("seq.num:%d,num_of_trys:%d ,Time diff:%f, RTO:%f, RTT:%f\n",
+                                   windowcontrol[i].seq_num, windowcontrol[i].num_of_trys, time_diff, RTO, RTT);
+                            windowcontrol[i].status = -1;
+                            windowcontrol[i].t.tv_sec = 0;
+                            windowcontrol[i].t.tv_usec = 0;
+                            windowcontrol[i].num_of_trys++;
+                            sprintf(buf, "%d", windowcontrol[i].seq_num);
+                            message_queue_send(buf, SMP_SYSTEM_MESSAGE);
+                            printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
+                        }
                 }
             }
             pthread_mutex_unlock(&lock);
-
         }
-
     }
 }
 void * receiver_routine(struct timeval t0) {
@@ -484,15 +510,15 @@ void * receiver_routine(struct timeval t0) {
         //tv.tv_usec = 0;
         //setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv,sizeof tv); // for non-blocking recvfrom calling
        n = recvfrom(client_socket, &ack_seq, sizeof(int),MSG_WAITALL, (struct sockaddr *) &servaddr,&s_len);
-        if (n != -1 && windowcontrol[ack_seq].status==1) {
+       pthread_mutex_lock(&lock);
+       if (n != -1 && windowcontrol[ack_seq].status==1) {
             printf("ACK seq number received: %d\n",ack_seq);
            // gettimeofday(&t1, 0);
 
-            pthread_mutex_lock(&lock);
+           // pthread_mutex_lock(&lock);
             if(gettimeofday(&rt, 0)==-1)
             {
                 perror("getimeofday");
-
             }
             sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, rt);
             Update_Net_Params(sampled_rtt);
@@ -504,5 +530,7 @@ void * receiver_routine(struct timeval t0) {
             pthread_mutex_unlock(&lock);
 
         }
-    }
+       pthread_mutex_unlock(&lock);
+
+   }
 }

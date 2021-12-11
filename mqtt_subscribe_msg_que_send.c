@@ -32,7 +32,7 @@ void connlost(void *context, char *cause)
     printf("     cause: %s\n", cause);
 }
 
-int main(int argc,void **argv)
+int main1(int argc,void **argv)
 {
 
     MQTTClient client;
