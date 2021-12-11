@@ -12,7 +12,7 @@
         pthread_t sender_thread,receiver_thread,win_control_thread;
         pthread_mutex_init(&lock,NULL);
         //msg_que_create("msgq"); ///
-        msg_rcv_init(&msqid_global,"incapsulation_debug");
+       msg_rcv_init(&msqid_global,"incapsulation_debug");
         udp_init_client();
         t0=(struct timeval){0};
         gettimeofday(&t0, 0);
@@ -20,6 +20,7 @@
         {
             windowcontrol[i].status=-1;
             windowcontrol[i].seq_num=-1;
+            windowcontrol[i].num_of_trys=0;
 
         }
         pthread_create((pthread_t *)&sender_thread,NULL,(void *)&sender_routine,&t0);

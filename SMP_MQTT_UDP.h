@@ -90,6 +90,7 @@ struct window_control{
     int seq_num;
     int status; //(-1)-not sent yet,1-sent and waiting to ack
     struct timeval t;
+    int num_of_trys;
 };
 struct smp_client_server_params{
     float rtt;

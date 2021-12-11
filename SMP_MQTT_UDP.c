@@ -180,33 +180,18 @@ void udp_init_server()
     server_init_respond();
 }
 //RTT and RTO estimation
-float timedifference_msec(struct timeval y, struct timeval x)
+float timedifference_msec(struct timeval b, struct timeval a)
 {
     //return (t1.tv_sec - t0.tv_sec) * 1000.0f + (t1.tv_usec - t0.tv_usec) / 1000.0f;
     struct timeval result;
-    {
-        /* Perform the carry for the later subtraction by updating y. */
-        if (x.tv_usec < y.tv_usec) {
-            int nsec = (y.tv_usec - x.tv_usec) / 1000000 + 1;
-            y.tv_usec -= 1000000 * nsec;
-            y.tv_sec += nsec;
-        }
-        if (x.tv_usec - y.tv_usec > 1000000) {
-            int nsec = (y.tv_usec - x.tv_usec) / 1000000;
-            y.tv_usec += 1000000 * nsec;
-            y.tv_sec -= nsec;
-        }
 
-        /* Compute the time remaining to wait.
-           tv_usec is certainly positive. */
-        result.tv_sec = x.tv_sec - y.tv_sec;
-        result.tv_usec = x.tv_usec - y.tv_usec;
-
-        /* Return 1 if result is negative. */
-        return (result.tv_sec * 1000.0f + result.tv_usec / 1000.0f);
-
+    (result).tv_sec = (a).tv_sec - (b).tv_sec;
+    (result).tv_usec = (a).tv_usec - (b).tv_usec;
+    if ((result).tv_usec < 0) {
+      --(result).tv_sec;
+      (result).tv_usec += 1000000;
     }
-
+    return result.tv_sec*1000.0f+result.tv_usec/1000.0f;
 }
 
 int NETWORK_PARAMS_INIT(){
@@ -220,25 +205,37 @@ int NETWORK_PARAMS_INIT(){
     tv.tv_sec = network_params.INIT_TIME_OUT;
     tv.tv_usec = 0;
    setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
-    gettimeofday(&t0, 0);
+    if(gettimeofday(&t0, 0)==-1)
+    {
+        perror("getimeofday");
+    }
     sendto(client_socket, "RTT_INIT", sizeof("RTT_INIT"),MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
     while(num_of_try<network_params.NUM_OF_TRY)
     {
-        gettimeofday(&t1, 0);
-        if ((timedifference_msec(t0,t1) >=network_params.INIT_TIME_OUT) && (num_of_try <= network_params.NUM_OF_TRY) ) { // max timer val for retransmtion?? // num of trys?
+        if(gettimeofday(&t1, 0)==-1)
+        {
+            perror("getimeofday");
+
+        }        if ((timedifference_msec(t0,t1) >=network_params.INIT_TIME_OUT) && (num_of_try <= network_params.NUM_OF_TRY) ) { // max timer val for retransmtion?? // num of trys?
             t0=(struct timeval){0};
             t1=(struct timeval){0};
             printf("No respond from server, trying again to init RTT...\n");
             sendto(client_socket, "RTT_INIT", sizeof("RTT_INIT"), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
-            gettimeofday(&t0, 0);
-        }
+            if(gettimeofday(&t0, 0)==-1)
+            {
+                perror("getimeofday");
+
+            }        }
        // n=ACK_rcv();
         n = recvfrom(client_socket, (char *)msg, sizeof(msg),SO_RCVTIMEO, (struct sockaddr *) &servaddr,&s_len);
         if(n!=-1) {
-            gettimeofday(&t1, 0);
+            if(gettimeofday(&t1, 0)==-1)
+            {
+                perror("getimeofday");
+            }
             RTT = timedifference_msec(t0, t1);
             RTO =  RTT+network_params.DELTA*RTT;
-            DEV=0;
+            DEV=RTO-RTT; // ??
             client_server_params.rtt=RTT;
             client_server_params.rtt=RTO;
             printf("RTT was init to %f milliseconds.\n", RTT);
@@ -305,7 +302,7 @@ void Update_Net_Params(float SAMPLE_RTT)
     if(SAMPLE_RTT<=network_params.MAX_ALLOW_RTT) {  // filter for faulty RTT measurements.
         RTT = (1-network_params.ALPHA)*RTT+ network_params.ALPHA * SAMPLE_RTT;
         DEV = DEV*(1-network_params.BETA)+network_params.BETA*(abs((SAMPLE_RTT - RTT)));
-        RTO = RTT + 15*abs(DEV);
+        RTO = RTT +10*abs(DEV)+0.5*RTT;
     }
 }
 void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_for_sequence_select)
@@ -420,7 +417,10 @@ void * sender_routine(void* arg)
                 sendto(client_socket, &arr[sqe_sender_arr[i]], sizeof(struct sm_msg_arr), MSG_CONFIRM,(const struct sockaddr *) &servaddr, s_len);
                 windowcontrol[sqe_sender_arr[i]].status = 1;
                 windowcontrol[sqe_sender_arr[i]].seq_num=sequence_number;
-                gettimeofday(&(windowcontrol[sqe_sender_arr[i]].t), 0);
+                if(gettimeofday(&(windowcontrol[sqe_sender_arr[i]].t), 0)==-1)
+                {
+                    perror("getimeofday");
+                }
                 pthread_mutex_unlock(&lock);
 
             }
@@ -437,26 +437,30 @@ void* win_control_routine(struct timeval t0)
 {
     float time_diff = 0;
     char buf[10];
-
+    struct timeval rt;
 
     while(1)
     {
         for (int i = 0; i <client_server_params.window_size; i++) {
-            pthread_mutex_lock(&lock);
-            gettimeofday(&t1, 0);
-            if (windowcontrol[i].status == 1) {
-                time_diff = timedifference_msec(windowcontrol[i].t, t1);
-             //   printf("seq.num:%d, time diff:%f\n", windowcontrol[i].seq_num, time_diff);
+            if(gettimeofday(&rt, 0)==-1)
+            {
+                perror("getimeofday");
             }
-            if (time_diff >= RTO && windowcontrol[i].seq_num!=-1) {
-                printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
-                printf("seq.num:%d,Time diff:%f, RTO:%f, RTT:%f\n",windowcontrol[i].seq_num,time_diff,RTO,RTT);
-                windowcontrol[i].status = -1;
-                windowcontrol[i].t.tv_sec=0;
-                windowcontrol[i].t.tv_usec=0;
-                sprintf(buf, "%d", windowcontrol[i].seq_num);
-                message_queue_send(buf,SMP_SYSTEM_MESSAGE);
-                printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
+            pthread_mutex_lock(&lock);
+            if ((windowcontrol[i].status == 1) && (windowcontrol[i].seq_num != -1)) {
+                time_diff = timedifference_msec(windowcontrol[i].t, rt);
+                //   printf("seq.num:%d, time diff:%f\n", windowcontrol[i].seq_num, time_diff);
+                if (time_diff >= RTO  ) {
+                    printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
+                    printf("seq.num:%d,num_of_trys:%d ,Time diff:%f, RTO:%f, RTT:%f\n", windowcontrol[i].seq_num,windowcontrol[i].num_of_trys, time_diff, RTO, RTT);
+                    windowcontrol[i].status = -1;
+                    windowcontrol[i].t.tv_sec = 0;
+                    windowcontrol[i].t.tv_usec = 0;
+                    windowcontrol[i].num_of_trys++;
+                    sprintf(buf, "%d", windowcontrol[i].seq_num);
+                    message_queue_send(buf, SMP_SYSTEM_MESSAGE);
+                    printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
+                }
             }
             pthread_mutex_unlock(&lock);
 
@@ -470,7 +474,9 @@ void * receiver_routine(struct timeval t0) {
     struct timeval tv;
     int ack_seq=1;
     float t;
-    t1 = (struct timeval) {0};
+    //t1 = (struct timeval) {0};
+    struct timeval rt;
+
     //gettimeofday(&t1, 0);
    while (1) {
 
@@ -478,21 +484,23 @@ void * receiver_routine(struct timeval t0) {
         //tv.tv_usec = 0;
         //setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv,sizeof tv); // for non-blocking recvfrom calling
        n = recvfrom(client_socket, &ack_seq, sizeof(int),MSG_WAITALL, (struct sockaddr *) &servaddr,&s_len);
-        if (n != -1) {
+        if (n != -1 && windowcontrol[ack_seq].status==1) {
             printf("ACK seq number received: %d\n",ack_seq);
            // gettimeofday(&t1, 0);
 
             pthread_mutex_lock(&lock);
-            gettimeofday(&t1, 0);
-            sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, t1);
-            if(sampled_rtt>1)
-                printf("win_control:%d,timediff %f\n",ack_seq,windowcontrol[ack_seq].t.tv_usec);
-            printf("RTT sample: %f, RTT:%f,RTO:%f\n",sampled_rtt,RTT,RTO);
+            if(gettimeofday(&rt, 0)==-1)
+            {
+                perror("getimeofday");
+
+            }
+            sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, rt);
             Update_Net_Params(sampled_rtt);
             windowcontrol[ack_seq].status = -1;
             windowcontrol[ack_seq].seq_num = -1;
             windowcontrol[ack_seq].t.tv_sec = 0;
             windowcontrol[ack_seq].t.tv_usec = 0;
+            windowcontrol[ack_seq].num_of_trys=0;
             pthread_mutex_unlock(&lock);
 
         }
