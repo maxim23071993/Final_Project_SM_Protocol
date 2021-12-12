@@ -388,6 +388,7 @@ void init_params(char *file_name) {
     }
     client_server_params.smp_msg_arr_size = (network_params.bandwidth / (8 * (MAX_PAYLOAD_SIZE + MAX_TOPIC_SIZE)) *network_params.typical_rtt/1000);
     client_server_params.window_size = network_params.bandwidth / (8 * (MAX_PAYLOAD_SIZE + MAX_TOPIC_SIZE));
+
 }
 /*####################################################################################################################*/
 //Thread routine
@@ -445,6 +446,7 @@ void* win_control_routine(struct timeval t0) {
 
     while (1) {
         for (int i = 0; i < client_server_params.window_size; i++) {
+            time_diff=0;
             if (gettimeofday(&rt, 0) == -1) {
                 perror("getimeofday");
             }
@@ -469,7 +471,7 @@ void* win_control_routine(struct timeval t0) {
                         break;
 
                     default:
-                        if (time_diff >= RTO) {
+                        if (time_diff > RTO) {
                             printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
                             printf("seq.num:%d,num_of_trys:%d ,Time diff:%f, RTO:%f, RTT:%f,DEV:%f\n",
                                    windowcontrol[i].seq_num, windowcontrol[i].num_of_trys, time_diff, RTO, RTT,DEV);
@@ -480,8 +482,8 @@ void* win_control_routine(struct timeval t0) {
                             sprintf(buf, "%d", windowcontrol[i].seq_num);
                             message_queue_send(buf, SMP_SYSTEM_MESSAGE);
                             printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
-                            Update_Net_Params(100*(time_diff-RTO)); // need to add new parameter for fast raising.
-
+                            Update_Net_Params((time_diff-RTO)); // need to add new parameter for fast raising.
+                           // RTO=time_diff;
                         }
                 }
             }

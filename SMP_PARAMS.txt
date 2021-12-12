@@ -9,7 +9,7 @@ d) Server ip :192.168.1.111
 e) Satelite line bandwidth :100000
 f) Connection retransmission number :10
 g) First maximum timeout :1
-h) Max allowed RTT :1000
+h) Max allowed RTT :1500
 i) Alpha :0.0125
 j) Beta :0.25
 k) Gamma :0.5
