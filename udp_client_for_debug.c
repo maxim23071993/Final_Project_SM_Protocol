@@ -16,7 +16,7 @@ int main()
     udp_init_client();
     //sendto(send_socket, (const char *) message, sizeof(message), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,s_len;
 //    udp_send(message);
-    ACK_rcv();
+//    ACK_rcv();
 
     return 0;
 }

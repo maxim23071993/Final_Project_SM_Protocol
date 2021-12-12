@@ -302,7 +302,9 @@ void Update_Net_Params(float SAMPLE_RTT)
     if(SAMPLE_RTT<=network_params.MAX_ALLOW_RTT) {  // filter for faulty RTT measurements.
         RTT = (1-network_params.ALPHA)*RTT+ network_params.ALPHA * SAMPLE_RTT;
         DEV = DEV*(1-network_params.BETA)+network_params.BETA*(abs((SAMPLE_RTT - RTT)));
-        RTO = RTT +10*abs(DEV)+0.5*RTT;
+       RTO = RTT +10*abs(DEV)+0.5*RTT;
+        //RTO = RTT +10*abs(DEV);
+
     }
 }
 void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_for_sequence_select)
@@ -411,9 +413,10 @@ void * sender_routine(void* arg)
 
         for(int i=0;i<2;i++)
         {
+            pthread_mutex_lock(&lock);
             if(sqe_sender_arr[i]!=(-1))
             {
-                pthread_mutex_lock(&lock);
+                //pthread_mutex_lock(&lock);
                 sendto(client_socket, &arr[sqe_sender_arr[i]], sizeof(struct sm_msg_arr), MSG_CONFIRM,(const struct sockaddr *) &servaddr, s_len);
                 windowcontrol[sqe_sender_arr[i]].status = 1;
                 windowcontrol[sqe_sender_arr[i]].seq_num=sequence_number;
@@ -421,9 +424,10 @@ void * sender_routine(void* arg)
                 {
                     perror("getimeofday");
                 }
-                pthread_mutex_unlock(&lock);
+               // pthread_mutex_unlock(&lock);
 
             }
+            pthread_mutex_unlock(&lock);
         }
     }
 
@@ -437,6 +441,7 @@ void* win_control_routine(struct timeval t0) {
     float time_diff = 0;
     char buf[10];
     struct timeval rt;
+    int seq_loss=0;
 
     while (1) {
         for (int i = 0; i < client_server_params.window_size; i++) {
@@ -462,24 +467,12 @@ void* win_control_routine(struct timeval t0) {
                             printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
                         }
                         break;
-                    case 2:
-                        if (time_diff >= 3 * RTO) {
-                            printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
-                            printf("seq.num:%d,num_of_trys:%d ,Time diff:%f, RTO:%f, RTT:%f\n",windowcontrol[i].seq_num, windowcontrol[i].num_of_trys, time_diff, RTO, RTT);
-                            windowcontrol[i].status = -1;
-                            windowcontrol[i].t.tv_sec = 0;
-                            windowcontrol[i].t.tv_usec = 0;
-                            windowcontrol[i].num_of_trys++;
-                            sprintf(buf, "%d", windowcontrol[i].seq_num);
-                            message_queue_send(buf, SMP_SYSTEM_MESSAGE);
-                            printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
-                        }
-                        break;
+
                     default:
                         if (time_diff >= RTO) {
                             printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
-                            printf("seq.num:%d,num_of_trys:%d ,Time diff:%f, RTO:%f, RTT:%f\n",
-                                   windowcontrol[i].seq_num, windowcontrol[i].num_of_trys, time_diff, RTO, RTT);
+                            printf("seq.num:%d,num_of_trys:%d ,Time diff:%f, RTO:%f, RTT:%f,DEV:%f\n",
+                                   windowcontrol[i].seq_num, windowcontrol[i].num_of_trys, time_diff, RTO, RTT,DEV);
                             windowcontrol[i].status = -1;
                             windowcontrol[i].t.tv_sec = 0;
                             windowcontrol[i].t.tv_usec = 0;
@@ -487,6 +480,8 @@ void* win_control_routine(struct timeval t0) {
                             sprintf(buf, "%d", windowcontrol[i].seq_num);
                             message_queue_send(buf, SMP_SYSTEM_MESSAGE);
                             printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
+                            Update_Net_Params(100*(time_diff-RTO)); // need to add new parameter for fast raising.
+
                         }
                 }
             }
