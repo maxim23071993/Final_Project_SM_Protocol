@@ -3,9 +3,9 @@
 Plese start filling the parameter rhigt after ":" 
 
 a) Client port :8080
-b) Client ip :192.168.1.111
+b) Client ip :192.168.1.109
 c) Server port :8081
-d) Server ip :192.168.1.111
+d) Server ip :192.168.1.109
 e) Satelite line bandwidth :100000
 f) Connection retransmission number :10
 g) First maximum timeout :1
@@ -13,7 +13,7 @@ h) Max allowed RTT :1500
 i) Alpha :0.0125
 j) Beta :0.25
 k) Gamma :0.5
-l) Delta :0.5
+l) Delta :0.05
 m) Typical satelitte link RTT :500
 
 ##########################################################################
