@@ -53,7 +53,7 @@ int main()
     strcpy(message.payload,"123");
    while(1){
         mqtt_publish(&message);
-       sleep(0.1);
+       sleep(0.001);
     }
     return 0;
 }

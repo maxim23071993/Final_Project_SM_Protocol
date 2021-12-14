@@ -3,7 +3,7 @@
 //
 #include "SMP_MQTT_UDP.h"
 #include <stdlib.h>
-void main()
+void main1()
 {
     int i;
     int msqid;
@@ -15,7 +15,7 @@ void main()
     //msg_rcv_init(&msqid,"msgq");
     int sqe_arr[2];
 
-   for( i=0;i<500;i++)
+   for( i=0;i<5000;i++)
     {
        sprintf(payload,"%d",i);
        sleep(0.01);

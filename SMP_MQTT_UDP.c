@@ -302,8 +302,8 @@ void Update_Net_Params(float SAMPLE_RTT)
     if(SAMPLE_RTT<=network_params.MAX_ALLOW_RTT) {  // filter for faulty RTT measurements.
         RTT = (1-network_params.ALPHA)*RTT+ network_params.ALPHA * SAMPLE_RTT;
         DEV = DEV*(1-network_params.BETA)+network_params.BETA*(abs((SAMPLE_RTT - RTT)));
-       RTO = RTT +10*abs(DEV)+0.5*RTT;
-        //RTO = RTT +10*abs(DEV);
+       //RTO = RTT +10*abs(DEV)+0.5*RTT;
+        RTO = RTT +10*DEV;
 
     }
 }
@@ -313,7 +313,9 @@ void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_
         *previous_sqe=-1;
     while(windowcontrol[*previous_sqe+1].status!=(-1)) {
         //pthread_mutex_unlock(&lock);
-        usleep(time_to_wait_for_sequence_select);
+        if(usleep(10)==-1){
+            perror("sleep error");
+        }
         //pthread_mutex_lock(&lock);
 
     }
@@ -443,11 +445,13 @@ void * sender_routine(void* arg)
 void* win_control_routine(struct timeval t0) {
     float time_diff = 0;
     char buf[10];
-    struct timeval rt;
+    struct timeval rt,a,b;
     int seq_loss=0;
+    float tmp;
 
     while (1) {
         for (int i = 0; i < client_server_params.window_size; i++) {
+            gettimeofday(&a,0);
             time_diff=0;
             if (gettimeofday(&rt, 0) == -1) {
                 perror("getimeofday");
@@ -483,8 +487,12 @@ void* win_control_routine(struct timeval t0) {
                             sprintf(buf, "%d", windowcontrol[i].seq_num);
                             message_queue_send(buf, SMP_SYSTEM_MESSAGE);
                             printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
-                            //Update_Net_Params((time_diff-RTO)); // need to add new parameter for fast raising.
-                            RTO=time_diff;
+                            //printf("time_diff-RTO:%f\n",(100*(time_diff-RTO)/RTT));
+
+                            Update_Net_Params((RTT+1000*(time_diff-RTO)/RTT)); // need to add new parameter for fast raising.
+                           // gettimeofday(&b,0);
+                           // printf("net param time:%f\n", timedifference_msec(a,b));
+
                         }
                 }
             }
@@ -520,7 +528,8 @@ void * receiver_routine(struct timeval t0) {
             }
             sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, rt);
             Update_Net_Params(sampled_rtt);
-            windowcontrol[ack_seq].status = -1;
+         //  printf("RECIVER RUTINE: seq.num:%d,SAMPED_RTT:%f,RTO:%f,RTT:%f,DEV:%f\n",windowcontrol[ack_seq].seq_num,sampled_rtt, RTO, RTT,DEV);
+           windowcontrol[ack_seq].status = -1;
             windowcontrol[ack_seq].seq_num = -1;
             windowcontrol[ack_seq].t.tv_sec = 0;
             windowcontrol[ack_seq].t.tv_usec = 0;
