@@ -352,7 +352,7 @@ void Update_Net_Params(float SAMPLE_RTT)
         RTT = (1-network_params.ALPHA)*RTT+ network_params.ALPHA * SAMPLE_RTT;
         DEV = DEV*(1-network_params.BETA)+network_params.BETA*(abs((SAMPLE_RTT - RTT)));
        //RTO = RTT +10*abs(DEV)+0.5*RTT;
-        RTO = RTT +10*DEV;
+        RTO = RTT +4*DEV;
 
     }
 }
@@ -506,29 +506,32 @@ void* win_control_routine(struct timeval t0) {
     float tmp;
     while (1) {
         for (int i = 0; i < client_server_params.window_size; i++) {
-            gettimeofday(&a,0);
             time_diff=0;
             if (gettimeofday(&rt, 0) == -1) {
                 perror("getimeofday");
             }
             pthread_mutex_lock(&lock);
             if ((windowcontrol[i].status == 1) && (windowcontrol[i].seq_num != -1)) {
-                time_diff = timedifference_msec(windowcontrol[i].t, rt);
+                timersub(&rt,&windowcontrol[i].t,&res);
+                time_diff=res.tv_sec*1000.f+res.tv_usec/1000.f;
+              //  time_diff = timedifference_msec(windowcontrol[i].t, rt);
                 //   printf("seq.num:%d, time diff:%f\n", windowcontrol[i].seq_num, time_diff);
 
                         if (time_diff > RTO) {
+                            Update_Net_Params(time_diff); // need to add new parameter for fast raising.
                             printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
                             printf("seq.num:%d,num_of_trys:%d ,Time diff:%f, RTO:%f, RTT:%f,DEV:%f\n",windowcontrol[i].seq_num, windowcontrol[i].num_of_trys, time_diff, RTO, RTT,DEV);
                             windowcontrol[i].status = -1;
-                            windowcontrol[i].t.tv_sec = 0;
-                            windowcontrol[i].t.tv_usec = 0;
+                           // windowcontrol[i].t.tv_sec = 0;
+                          //  windowcontrol[i].t.tv_usec = 0;
+                            timerclear(&windowcontrol[i].t);
                             windowcontrol[i].num_of_trys++;
                             sprintf(buf, "%d", windowcontrol[i].seq_num);
                             message_queue_send(buf, SMP_SYSTEM_MESSAGE);
                             printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
                             //printf("time_diff-RTO:%f\n",(100*(time_diff-RTO)/RTT));
 
-                            Update_Net_Params((RTT+1000*(time_diff-RTO)/RTT)); // need to add new parameter for fast raising.
+                          //  Update_Net_Params(time_diff); // need to add new parameter for fast raising.
                            // gettimeofday(&b,0);
                            // printf("net param time:%f\n", timedifference_msec(a,b));
 
@@ -546,7 +549,7 @@ void * receiver_routine(struct timeval t0) {
     int ack_seq=1;
     float t;
     //t1 = (struct timeval) {0};
-    struct timeval rt;
+    struct timeval rt,res;
 
     //gettimeofday(&t1, 0);
    while (1) {
@@ -565,16 +568,18 @@ void * receiver_routine(struct timeval t0) {
             {
                 perror("getimeofday");
             }
-            sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, rt);
+            //sampled_rtt = timedifference_msec(windowcontrol[ack_seq].t, rt);
+           timersub(&rt,&windowcontrol[ack_seq].t,&res);
+           sampled_rtt=res.tv_sec*1000.f+res.tv_usec/1000.f;
             Update_Net_Params(sampled_rtt);
-         //  printf("RECIVER RUTINE: seq.num:%d,SAMPED_RTT:%f,RTO:%f,RTT:%f,DEV:%f\n",windowcontrol[ack_seq].seq_num,sampled_rtt, RTO, RTT,DEV);
+           printf("RECIVER RUTINE: seq.num:%d,SAMPELD_RTT:%f,RTO:%f,RTT:%f,DEV:%f\n",windowcontrol[ack_seq].seq_num,sampled_rtt, RTO, RTT,DEV);
            windowcontrol[ack_seq].status = -1;
             windowcontrol[ack_seq].seq_num = -1;
-            windowcontrol[ack_seq].t.tv_sec = 0;
-            windowcontrol[ack_seq].t.tv_usec = 0;
+           // windowcontrol[ack_seq].t.tv_sec = 0;
+           // windowcontrol[ack_seq].t.tv_usec = 0;
+           timerclear(&windowcontrol[ack_seq].t);
             windowcontrol[ack_seq].num_of_trys=0;
             pthread_mutex_unlock(&lock);
-
         }
        pthread_mutex_unlock(&lock);
 
