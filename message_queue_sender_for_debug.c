@@ -3,7 +3,7 @@
 //
 #include "SMP_MQTT_UDP.h"
 #include <stdlib.h>
-void main()
+void main1()
 {
     int i;
     int msqid;

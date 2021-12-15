@@ -3,6 +3,7 @@
 //
 #ifndef MQTT_CLIENTS_SMP_MQTT_UDP_H
 #define MQTT_CLIENTS_SMP_MQTT_UDP_H
+#include "MQTTClient.h"
 #include <sys/wait.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -101,6 +102,9 @@ struct smp_client_server_params{
 struct smp_client_server_params client_server_params;
 struct window_control * windowcontrol;
 /*####################################################################################################################*/
+//MQTT functions
+int mqtt_publish(struct sm_msg *message);
+/*####################################################################################################################*/
 //message queue functions
 void msg_que_create(char *topic);
 void message_queue_send( char *msg_payload,char * topic);
@@ -126,5 +130,4 @@ void * sender_routine();
 void * receiver_routine();
 void* win_control_routine();
 
-void * win_control_thread();
 #endif //MQTT_CLIENTS_SMP_MQTT_UDP_H

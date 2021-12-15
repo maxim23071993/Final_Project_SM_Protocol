@@ -2,7 +2,7 @@
 // Created by Maxim & Shlomi on 24/08/2021.
 //
 #include "SMP_MQTT_UDP.h"
-    int main(int argc,void **argv)
+    void main(int argc,void **argv)
     {
         char c;
         char file_name[100]={"//home//max//Desktop//MQTT Subscribe+msg_que+udp_git//SMP_PARAMS.txt"};
@@ -31,6 +31,6 @@
         pthread_join(win_control_thread,NULL);
 
 
-        while ( ( c = getchar() ) != EOF );
-        return 0;
+       // while ( ( c = getchar() ) != EOF );
+       // return 0;
     }
