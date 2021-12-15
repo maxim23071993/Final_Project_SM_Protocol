@@ -39,6 +39,7 @@ float RTO;
 float DEV;
 float sampled_rtt;
 
+
 struct smp_network_params{
     int client_port;
     char CLIENT_IP[15];

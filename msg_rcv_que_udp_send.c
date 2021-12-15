@@ -5,7 +5,7 @@
     int main(int argc,void **argv)
     {
         char c;
-        char file_name[100]={"//home//max//Desktop//MQTT Subscribe+msg_que+udp_git//SMP_PARAMS.txt"};
+        char file_name[100]={"//home//shlomi//Desktop//MQTT Subscribe+msg_que+udp_git//SMP_PARAMS.txt"};
         init_params(file_name);
         struct window_control * windowc_ontrol=malloc(client_server_params.window_size*(sizeof(struct window_control)));
         windowcontrol=windowc_ontrol;

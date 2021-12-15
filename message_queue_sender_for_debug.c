@@ -15,7 +15,7 @@ void main()
     //msg_rcv_init(&msqid,"msgq");
     int sqe_arr[2];
 
-   for( i=0;i<5000;i++)
+   for( i=0;i<10000;i++)
     {
        sprintf(payload,"%d",i);
        sleep(0.01);
