@@ -30,11 +30,11 @@ int main(int argc,void **argv)
 {
     MQTTClient client;
     MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
-    char file_name[100]={"//home//shlomi//Desktop//MQTT Subscribe+msg_que+udp_git//SMP_PARAMS.txt"};
+    //char file_name[100]={"//home//max//Desktop//MQTT Subscribe+msg_que+udp_git//SMP_PARAMS.txt"};
     int rc;
     int ch;
     char  topic[20];
-   // init_params(file_name);
+    //init_params(file_name);
   //  struct window_control  * win_control= (struct window_control *)malloc(sizeof(struct window_control )*client_server_params.window_size);
    // windowcontrol=win_control;
     msg_que_create("msgq");
