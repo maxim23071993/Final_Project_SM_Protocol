@@ -95,6 +95,10 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
                 strcpy(arr->msg_arr[arr->arr_size].topic,message.topic);
                 (arr->arr_size)++;
                 msgctl(msqid_global, IPC_STAT, &buf);
+                if(buf.msg_qnum==0){
+                    usleep(TIME_TO_WAIT);
+                }
+                msgctl(msqid_global, IPC_STAT, &buf);
                 if((arr->arr_size)==(data_arr_size) || buf.msg_qnum==0){
                     sqe_send_arr[1]=sqe_number;
                     return;
@@ -311,15 +315,21 @@ void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_
 {
     if(*previous_sqe==window_size-1)
         *previous_sqe=-1;
-    while(windowcontrol[*previous_sqe+1].status!=(-1)) {
-        //pthread_mutex_unlock(&lock);
-        if(usleep(10)==-1){
-            perror("sleep error");
-        }
-        //pthread_mutex_lock(&lock);
+    while(1) {
+        pthread_mutex_lock(&lock);
 
+        if (windowcontrol[*previous_sqe + 1].status != (-1)) {
+            pthread_mutex_unlock(&lock);
+            usleep(time_to_wait_for_sequence_select);
+        }
+        else
+        {
+            pthread_mutex_unlock(&lock);
+            (*previous_sqe)++;
+            return;
+        }
     }
-    (*previous_sqe)++;
+
 }
 void init_params(char *file_name) {
     int j;
@@ -412,7 +422,7 @@ void * sender_routine(void* arg)
 
     while(1)
     {
-        sequence_number_select(&sequence_number,client_server_params.window_size,TIME_TO_WAIT_FOR_WINDOW);
+        sequence_number_select(&sequence_number,client_server_params.window_size,TIME_TO_WAIT);
         message_encapsulation(&(arr[sequence_number]), client_server_params.smp_msg_arr_size, sequence_number,sqe_sender_arr);
 
         //gettimeofday(arg, 0);
@@ -460,23 +470,7 @@ void* win_control_routine(struct timeval t0) {
             if ((windowcontrol[i].status == 1) && (windowcontrol[i].seq_num != -1)) {
                 time_diff = timedifference_msec(windowcontrol[i].t, rt);
                 //   printf("seq.num:%d, time diff:%f\n", windowcontrol[i].seq_num, time_diff);
-                switch (windowcontrol[i].num_of_trys) {
-                  /*  case 1:
-                        if (time_diff >= 2 * RTO) {
-                            printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
-                            printf("seq.num:%d,num_of_trys:%d ,Time diff:%f, RTO:%f, RTT:%f\n",
-                                   windowcontrol[i].seq_num, windowcontrol[i].num_of_trys, time_diff, RTO, RTT);
-                            windowcontrol[i].status = -1;
-                            windowcontrol[i].t.tv_sec = 0;
-                            windowcontrol[i].t.tv_usec = 0;
-                            windowcontrol[i].num_of_trys++;
-                            sprintf(buf, "%d", windowcontrol[i].seq_num);
-                            message_queue_send(buf, SMP_SYSTEM_MESSAGE);
-                            printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
-                        }
-                        break;
-*/
-                    default:
+
                         if (time_diff > RTO) {
                             printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
                             printf("seq.num:%d,num_of_trys:%d ,Time diff:%f, RTO:%f, RTT:%f,DEV:%f\n",windowcontrol[i].seq_num, windowcontrol[i].num_of_trys, time_diff, RTO, RTT,DEV);
@@ -494,7 +488,7 @@ void* win_control_routine(struct timeval t0) {
                            // printf("net param time:%f\n", timedifference_msec(a,b));
 
                         }
-                }
+
             }
             pthread_mutex_unlock(&lock);
         }

@@ -69,7 +69,7 @@ pthread_mutex_t lock;
 //UDP defines and global variables
 #define CLIENT_PORT 8080
 #define SERVER_PORT 8081
-#define TIME_TO_WAIT_FOR_WINDOW 100 // useconds
+#define TIME_TO_WAIT 10 // useconds
 
 int client_socket;
 int server_socket;
