@@ -31,8 +31,6 @@
 #define PAYLOAD     "Hello World!"
 #define QOS         1
 #define TIMEOUT     10000L
-volatile MQTTClient_deliveryToken deliveredtoken;
-
 /*####################################################################################################################*/
 //RTT, RTO and network parameters estimation and defines
 struct timeval t0;
