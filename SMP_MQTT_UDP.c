@@ -48,6 +48,32 @@ int mqtt_publish(struct sm_msg *message)
     MQTTClient_destroy(&client);
     return rc;
 }
+void delivered(void *context, MQTTClient_deliveryToken dt)
+{
+    printf("Message with token value %d delivery confirmed\n", dt);
+    deliveredtoken = dt;
+}
+int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message)
+{
+    int i;
+    char* payloadptr;
+
+    printf("MQTT Message arrived on topic:%s , %s\n",topicName,(char *)message->payload);
+
+
+    payloadptr = message->payload;
+
+
+    message_queue_send(message->payload,topicName);
+    MQTTClient_freeMessage(&message);
+    MQTTClient_free(topicName);
+    return 1;
+}
+void connlost(void *context, char *cause)
+{
+    printf("\nConnection lost\n");
+    printf("     cause: %s\n", cause);
+}
 /*####################################################################################################################*/
 //message queu
 void msg_que_create(char *topic)
@@ -500,8 +526,7 @@ void * sender_routine(void* arg)
 void* win_control_routine(struct timeval t0) {
     float time_diff = 0;
     char buf[10];
-    struct timeval rt,a,b;
-    gettimeofday(&a,0);
+    struct timeval rt,res;
     int seq_loss=0;
     float tmp;
     while (1) {

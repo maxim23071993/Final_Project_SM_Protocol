@@ -31,6 +31,8 @@
 #define PAYLOAD     "Hello World!"
 #define QOS         1
 #define TIMEOUT     10000L
+volatile MQTTClient_deliveryToken deliveredtoken;
+
 /*####################################################################################################################*/
 //RTT, RTO and network parameters estimation and defines
 struct timeval t0;
@@ -105,6 +107,10 @@ struct window_control * windowcontrol;
 /*####################################################################################################################*/
 //MQTT functions
 int mqtt_publish(struct sm_msg *message);
+void delivered(void *context, MQTTClient_deliveryToken dt);
+int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message);
+void connlost(void *context, char *cause);
+
 /*####################################################################################################################*/
 //message queue functions
 void msg_que_create(char *topic);
