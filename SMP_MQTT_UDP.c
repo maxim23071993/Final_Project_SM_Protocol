@@ -240,8 +240,7 @@ int NETWORK_PARAMS_INIT(){
                 perror("getimeofday");
             }
             RTT = timedifference_msec(t0, t1);
-            RTO =  RTT+network_params.DELTA*RTT;
-            DEV=RTO-RTT; // ??
+            RTO =  RTT + 4*network_params.MIN_DEV;
             client_server_params.rtt=RTT;
             client_server_params.rtt=RTO;
             printf("RTT was init to %f milliseconds.\n", RTT);
@@ -308,8 +307,9 @@ void Update_Net_Params(float SAMPLE_RTT)
     if(SAMPLE_RTT<=network_params.MAX_ALLOW_RTT) {  // filter for faulty RTT measurements.
         RTT = (1-network_params.ALPHA)*RTT+ network_params.ALPHA * SAMPLE_RTT;
         DEV = DEV*(1-network_params.BETA)+network_params.BETA*(abs((SAMPLE_RTT - RTT)));
-       //RTO = RTT +10*abs(DEV)+0.5*RTT;
-        RTO = RTT +4*DEV;
+        if(DEV>network_params.MIN_DEV) {
+            RTO = RTT + 4 * DEV;
+        } else RTO = RTT + 4 * network_params.MIN_DEV;
 
     }
 }
@@ -392,7 +392,7 @@ void init_params(char *file_name) {
                         network_params.BETA = atof(str);
                         break;
                     case 11:
-                        network_params.GAMMA = atof(str);
+                        network_params.MIN_DEV = atof(str);
                         break;
                     case 12:
                         network_params.DELTA = atof(str);

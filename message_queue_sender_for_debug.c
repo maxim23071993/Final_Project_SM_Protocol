@@ -11,7 +11,7 @@ void main()
     char payload[10];
     struct sm_msg msg;
     struct sm_msg_arr arr[10];
-    msg_que_create("incapsulation_debug");
+    msg_que_create("msgq");
     //msg_rcv_init(&msqid,"msgq");
     int sqe_arr[2];
 

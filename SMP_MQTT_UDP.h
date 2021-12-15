@@ -52,7 +52,7 @@ struct smp_network_params{
     float MAX_ALLOW_RTT;
     float ALPHA;
     float BETA;
-    float GAMMA;
+    float MIN_DEV;
     float DELTA;
     int typical_rtt;
 };
