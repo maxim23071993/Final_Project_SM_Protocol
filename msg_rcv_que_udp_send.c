@@ -22,9 +22,9 @@
             windowcontrol[i].num_of_trys=0;
 
         }
-        pthread_create((pthread_t *)&sender_thread,NULL,(void *)&sender_routine,&t0);
-        pthread_create((pthread_t *)&receiver_thread,NULL,(void *)&receiver_routine,&t0);
-        pthread_create((pthread_t *)&win_control_thread,NULL,(void *)&win_control_routine,&t0);
+        pthread_create((pthread_t *)&sender_thread,NULL,(void *)&client_sender_routine,&t0);
+        pthread_create((pthread_t *)&receiver_thread,NULL,(void *)&client_receive_routine,&t0);
+        pthread_create((pthread_t *)&win_control_thread,NULL,(void *)&client_win_control_routine,&t0);
 
         pthread_join(sender_thread,NULL);
         pthread_join(receiver_thread,NULL);

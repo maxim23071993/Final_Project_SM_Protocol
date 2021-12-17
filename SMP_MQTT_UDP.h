@@ -3,7 +3,6 @@
 //
 #ifndef MQTT_CLIENTS_SMP_MQTT_UDP_H
 #define MQTT_CLIENTS_SMP_MQTT_UDP_H
-#include "MQTTClient.h"
 #include <sys/wait.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -23,6 +22,7 @@
 #include <sys/select.h>
 #include <arpa/inet.h>
 #include <inttypes.h>
+#include "MQTTClient.h"
 /*####################################################################################################################*/
 //MQTT defines and global variables
 #define ADDRESS     "tcp://localhost:1883"
@@ -31,6 +31,7 @@
 #define PAYLOAD     "Hello World!"
 #define QOS         0
 #define TIMEOUT     10000L
+volatile MQTTClient_deliveryToken deliveredtoken;
 /*####################################################################################################################*/
 //RTT, RTO and network parameters estimation and defines
 struct timeval t0;
@@ -66,12 +67,12 @@ struct smp_network_params network_params;
 #define SMP_SYSTEM_MESSAGE "SMP SYS MSG"
 
 int msqid_global;
-pthread_mutex_t lock;
+pthread_mutex_t lock,server_lock;
 /*####################################################################################################################*/
 //UDP defines and global variables
 #define CLIENT_PORT 8080
 #define SERVER_PORT 8081
-#define TIME_TO_WAIT 100000 // useconds
+#define TIME_TO_WAIT 10 // useconds
 
 int client_socket;
 int server_socket;
@@ -108,7 +109,6 @@ int mqtt_publish(struct sm_msg *message);
 void delivered(void *context, MQTTClient_deliveryToken dt);
 int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message);
 void connlost(void *context, char *cause);
-
 /*####################################################################################################################*/
 //message queue functions
 void msg_que_create(char *topic);
@@ -128,11 +128,13 @@ void Update_Net_Params(float SAMPLE_RTT);
 void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_for_sequence_select);
 void init_params(char *file_name);
 float timedifference_msec(struct timeval x, struct timeval y);
-
 /*####################################################################################################################*/
-//Thread routine
-void * sender_routine();
-void * receiver_routine();
-void* win_control_routine();
+//Client Thread routine
+void * client_sender_routine();
+void * client_receive_routine();
+void* client_win_control_routine();
+//Server Thread routine
+void * server_receive_routine(struct sm_msg_arr  *arr);
+void * server_mqtt_publish_routine(struct sm_msg_arr  *arr);
 
 #endif //MQTT_CLIENTS_SMP_MQTT_UDP_H

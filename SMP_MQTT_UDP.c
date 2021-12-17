@@ -4,7 +4,76 @@
 #include "SMP_MQTT_UDP.h"
 /*####################################################################################################################*/
 //MQTT
+int mqtt_publish(struct sm_msg *message)
+{
+    MQTTClient client;
+    MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
+    MQTTClient_message pubmsg = MQTTClient_message_initializer;
+    MQTTClient_deliveryToken token;
+    int rc;
 
+    if ((rc = MQTTClient_create(&client, ADDRESS, CLIENTID,
+                                MQTTCLIENT_PERSISTENCE_NONE, NULL)) != MQTTCLIENT_SUCCESS)
+    {
+        printf("Failed to create client, return code %d\n", rc);
+        exit(EXIT_FAILURE);
+    }
+
+    conn_opts.keepAliveInterval = 20;
+    conn_opts.cleansession = 1;
+    if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS)
+    {
+        printf("Failed to connect, return code %d\n", rc);
+        exit(EXIT_FAILURE);
+    }
+
+    pubmsg.payload = message->payload;
+    pubmsg.payloadlen = (int)strlen(message->payload);
+    pubmsg.qos = QOS;
+    pubmsg.retained = 0;
+    if ((rc = MQTTClient_publishMessage(client, message->topic, &pubmsg, &token)) != MQTTCLIENT_SUCCESS)
+    {
+        printf("Failed to publish message, return code %d\n", rc);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Waiting for up to %d seconds for publication of %s\n"
+           "on topic %s for client with ClientID: %s\n",
+           (int)(TIMEOUT/1000), PAYLOAD, TOPIC, CLIENTID);
+    rc = MQTTClient_waitForCompletion(client, token, TIMEOUT);
+    printf("Message with delivery token %d delivered\n", token);
+
+    if ((rc = MQTTClient_disconnect(client, 10000)) != MQTTCLIENT_SUCCESS)
+        printf("Failed to disconnect, return code %d\n", rc);
+    MQTTClient_destroy(&client);
+    return rc;
+}
+void delivered(void *context, MQTTClient_deliveryToken dt)
+{
+    printf("Message with token value %d delivery confirmed\n", dt);
+    deliveredtoken = dt;
+}
+int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message)
+{
+    int i;
+    char* payloadptr;
+
+    printf("MQTT Message arrived on topic:%s , %s\n",topicName,(char *)message->payload);
+
+
+    payloadptr = message->payload;
+
+
+    message_queue_send(message->payload,topicName);
+    MQTTClient_freeMessage(&message);
+    MQTTClient_free(topicName);
+    return 1;
+}
+void connlost(void *context, char *cause)
+{
+    printf("\nConnection lost\n");
+    printf("     cause: %s\n", cause);
+}
 /*####################################################################################################################*/
 //message queu
 void msg_que_create(char *topic)
@@ -291,10 +360,13 @@ void server_init_respond() {
                 k = recvfrom(server_socket, &tmp, sizeof(struct smp_client_server_params), MSG_WAITALL, (struct sockaddr *) &cliaddr,&c_len);
                 if (k != -1) {
 
-                    printf("RTT_SERVER was init to %f millisecond...\n", tmp.rtt);
-                    printf("RTO_SERVER was init to %f millisecond...\n", tmp.rto);
-
+                    printf("RTT_SERVER was init to %f msec\n", tmp.rtt);
+                    printf("RTO_SERVER was init to %f msec\n", tmp.rto);
+                    printf("Max encapsulated message size is %d\n", tmp.smp_msg_arr_size);
+                    printf("Client and server window was set to %d\n", tmp.window_size);
                 }
+                client_server_params.window_size=tmp.window_size;
+                client_server_params.smp_msg_arr_size=tmp.smp_msg_arr_size;
                 sendto(server_socket, (const char *) RTT_ack, sizeof(RTT_ack), MSG_CONFIRM,
                        (const struct sockaddr *) &cliaddr, c_len);
                 return;
@@ -410,7 +482,7 @@ void init_params(char *file_name) {
 }
 /*####################################################################################################################*/
 //Thread routine
-void * sender_routine(void* arg)
+void * client_sender_routine(void* arg)
 {
     int s_len=sizeof(servaddr);
     int c_len=sizeof(cliaddr);
@@ -454,7 +526,7 @@ void * sender_routine(void* arg)
         printf("message queue: done receiving messages.\n");
         system("rm msgq.txt");*/
 }
-void* win_control_routine(struct timeval t0) {
+void* client_win_control_routine(struct timeval t0) {
     float time_diff = 0;
     char buf[10];
     struct timeval rt,res;
@@ -498,7 +570,7 @@ void* win_control_routine(struct timeval t0) {
         }
     }
 }
-void * receiver_routine(struct timeval t0) {
+void * client_receive_routine(struct timeval t0) {
     int n;
     int s_len = sizeof(servaddr);
     struct timeval tv;
@@ -541,3 +613,55 @@ void * receiver_routine(struct timeval t0) {
 
    }
 }
+//Server Thread routine
+void * server_receive_routine(struct sm_msg_arr  *arr)
+{
+    struct sm_msg_arr *message = malloc(sizeof(struct sm_msg_arr));
+    int c_len = sizeof(cliaddr);
+    while (1)
+    {
+        if (recvfrom(server_socket, message, sizeof(struct sm_msg_arr), MSG_WAITALL, (struct sockaddr *) &cliaddr,&c_len) != -1)
+        {
+            sendto(server_socket, &message->sq_number, sizeof(int), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
+            pthread_mutex_lock(&server_lock);
+            arr[message->sq_number].arr_size = message->arr_size;
+            arr[message->sq_number].sq_number-message->sq_number;
+            arr[message->sq_number].msg_arr=message
+            pthread_mutex_unlock(&server_lock);
+        }
+    }
+}
+void * server_mqtt_publish_routine(struct sm_msg_arr  *arr)
+{
+    int i = 0;
+
+    while (i < client_server_params.window_size) {
+        while (1)
+        {
+            pthread_mutex_lock(&server_lock);
+            if (arr[i]->arr_size > 0)
+            {
+                printf("\n############################   %d   ####################################\n",arr[i]->sq_number);
+                printf("ACK on message seq %d was sent to client\n", arr[i]->sq_number);
+                for (int j = 0; j < arr[i]->arr_size; j++)
+                {
+                    printf("%s %s \n", arr[i]->msg_arr[j].topic, arr[i]->msg_arr[j].payload);
+                    // mqtt_publish(&arr[i]->msg_arr[j]);
+                }
+
+                pthread_mutex_unlock(&server_lock);
+                break;
+            }
+            else
+            {
+                pthread_mutex_unlock(&server_lock);
+                usleep(TIME_TO_WAIT);
+            }
+        }
+        i++;
+        if (i == client_server_params.window_size)
+            i = 0;
+    }
+}
+
+/*####################################################################################################################*/

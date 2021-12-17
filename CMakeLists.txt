@@ -11,10 +11,10 @@ ADD_EXECUTABLE(message_queue_sender_for_debug message_queue_sender_for_debug.c S
 
 SET_TARGET_PROPERTIES(PROPERTIES COMPILE_DEFINITIONS "PAHO_MQTT_IMPORTS=1")
 
+TARGET_LINK_LIBRARIES(message_queue_sender_for_debug  paho-mqtt3c)
 TARGET_LINK_LIBRARIES(mqtt_subscribe_msg_que_send paho-mqtt3c)
-TARGET_LINK_LIBRARIES(udp_rcv_mqtt_publish paho-mqtt3c)
+TARGET_LINK_LIBRARIES(udp_rcv_mqtt_publish ${CMAKE_THREAD_LIBS_INIT} paho-mqtt3c)
 TARGET_LINK_LIBRARIES(MQTTClient_publish paho-mqtt3c)
-TARGET_LINK_LIBRARIES( msg_rcv_que_udp_send ${CMAKE_THREAD_LIBS_INIT})
+TARGET_LINK_LIBRARIES(msg_rcv_que_udp_send ${CMAKE_THREAD_LIBS_INIT} paho-mqtt3c)
 
-INSTALL(TARGETS mqtt_subscribe_msg_que_send udp_rcv_mqtt_publish MQTTClient_publish RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
