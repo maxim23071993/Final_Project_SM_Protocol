@@ -29,7 +29,7 @@
 #define CLIENTID    "ExampleClientSub"
 #define TOPIC       "#"
 #define PAYLOAD     "Hello World!"
-#define QOS         1
+#define QOS         0
 #define TIMEOUT     10000L
 /*####################################################################################################################*/
 //RTT, RTO and network parameters estimation and defines

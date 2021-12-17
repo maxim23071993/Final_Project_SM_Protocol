@@ -98,7 +98,7 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
                 strcpy(arr->msg_arr[arr->arr_size].topic,message.topic);
                 (arr->arr_size)++;
                 msgctl(msqid_global, IPC_STAT, &buf);
-                if(buf.msg_qnum==0){
+               if(buf.msg_qnum==0){
                     usleep(TIME_TO_WAIT);
                 }
                 msgctl(msqid_global, IPC_STAT, &buf);

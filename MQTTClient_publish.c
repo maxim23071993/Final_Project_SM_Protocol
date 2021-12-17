@@ -1,15 +1,11 @@
 #include "MQTTClient.h"
 #include "SMP_MQTT_UDP.h"
-#include <time.h>
 
 int main()
 {
     int i=0;
     struct sm_msg message;
     strcpy(message.topic,"test");
-
-
-
     MQTTClient client;
     MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
     MQTTClient_message pubmsg = MQTTClient_message_initializer;
@@ -23,7 +19,7 @@ int main()
     }
 
     conn_opts.keepAliveInterval = 20;
-    conn_opts.cleansession = 1;
+    conn_opts.cleansession = 0;
 
     if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS)
     {
@@ -45,7 +41,7 @@ int main()
         printf("Failed to publish message, return code %d\n", rc);
         exit(EXIT_FAILURE);
     }
-        //usleep(100);
+        usleep(10000);
 
     }
     printf("Waiting for up to %d seconds for publication of %s\n"
