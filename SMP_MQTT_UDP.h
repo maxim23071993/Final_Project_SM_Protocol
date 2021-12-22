@@ -64,7 +64,7 @@ struct smp_network_params network_params;
 #define PERMS 0644
 #define MAX_PAYLOAD_SIZE 30
 #define MAX_TOPIC_SIZE 20
-#define MAX_NUM_OF_MESSAGE (300/(MAX_TOPIC_SIZE+MAX_PAYLOAD_SIZE))
+#define MAX_NUM_OF_MESSAGE (3000/(MAX_TOPIC_SIZE+MAX_PAYLOAD_SIZE))
 #define SMP_SYSTEM_MESSAGE "SMP SYS MSG"
 
 int msqid_global;

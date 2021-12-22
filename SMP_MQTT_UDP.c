@@ -58,7 +58,7 @@ int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *m
     int i;
     char* payloadptr;
 
-    printf("MQTT Message arrived on topic:%s , %s\n",topicName,(char *)message->payload);
+   // printf("MQTT Message arrived on topic:%s , %s\n",topicName,(char *)message->payload);
 
 
     payloadptr = message->payload;
@@ -517,7 +517,7 @@ void * client_sender_routine(void* arg)
                 if (arr[sqe_sender_arr[i]].arr_size > 0)
                 {
                     pthread_mutex_lock(&lock);
-                    printf("message with sqr_number %d sent\n",arr[sqe_sender_arr[i]].sq_number);
+                  //  printf("message with sqr_number %d sent\n",arr[sqe_sender_arr[i]].sq_number);
                     sendto(client_socket, &arr[sqe_sender_arr[i]], sizeof(struct sm_msg_arr), MSG_CONFIRM,(const struct sockaddr *) &servaddr, s_len);
 
                     windowcontrol[sqe_sender_arr[i]].status = 1;
@@ -558,6 +558,7 @@ void* client_win_control_routine(struct timeval t0) {
 
                         if (time_diff > RTO) {
                             Update_Net_Params(time_diff); // need to add new parameter for fast raising.
+
                             printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
                             printf("seq.num:%d,num_of_trys:%d ,Time diff:%f, RTO:%f, RTT:%f,DEV:%f\n",windowcontrol[i].seq_num, windowcontrol[i].num_of_trys, time_diff, RTO, RTT,DEV);
                             windowcontrol[i].status = -1;
@@ -599,7 +600,6 @@ void * client_receive_routine(struct timeval t0) {
        n = recvfrom(client_socket, &ack_seq, sizeof(int),MSG_WAITALL, (struct sockaddr *) &servaddr,&s_len);
        pthread_mutex_lock(&lock);
        if (n != -1 && windowcontrol[ack_seq].status==1) {
-            printf("ACK seq number received: %d\n",ack_seq);
            // gettimeofday(&t1, 0);
 
            // pthread_mutex_lock(&lock);
@@ -611,7 +611,8 @@ void * client_receive_routine(struct timeval t0) {
            timersub(&rt,&windowcontrol[ack_seq].t,&res);
            sampled_rtt=res.tv_sec*1000.f+res.tv_usec/1000.f;
             Update_Net_Params(sampled_rtt);
-           printf("RECIVER RUTINE: seq.num:%d,SAMPELD_RTT:%f,RTO:%f,RTT:%f,DEV:%f\n",windowcontrol[ack_seq].seq_num,sampled_rtt, RTO, RTT,DEV);
+           printf("ACK seq number received: %d\n",ack_seq);
+           //printf("RECIVER RUTINE: seq.num:%d,SAMPELD_RTT:%f,RTO:%f,RTT:%f,DEV:%f\n",windowcontrol[ack_seq].seq_num,sampled_rtt, RTO, RTT,DEV);
            windowcontrol[ack_seq].status = -1;
             windowcontrol[ack_seq].seq_num = -1;
            // windowcontrol[ack_seq].t.tv_sec = 0;
