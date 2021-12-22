@@ -137,7 +137,7 @@ void read_from_message_queue(struct sm_msg *message,int msqid){
         exit(1);
     }
 }
-void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_number,int * sqe_send_arr)
+void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int *sqe_number,int * sqe_send_arr)
 {
 
 
@@ -150,8 +150,7 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
     arr->arr_size=0;
     sqe_send_arr[0]=-1;
     sqe_send_arr[1]=-1;
-    arr->sq_number = sqe_number;
-
+    //arr->sq_number = *sqe_number;
     while(1)
     {
         read_from_message_queue(&message,msqid_global);
@@ -159,6 +158,8 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
         {
             case 0:
                 sqe_send_arr[0]=atoi(message.payload);
+                if(arr->arr_size==0)
+                    (*sqe_number)--;
                 return;
 
                 // operator doesn't match any case constant +, -, *, /
@@ -172,7 +173,8 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int sqe_numb
                 }
                 msgctl(msqid_global, IPC_STAT, &buf);
                 if((arr->arr_size)==(data_arr_size) || buf.msg_qnum==0){
-                    sqe_send_arr[1]=sqe_number;
+                    sqe_send_arr[1]=*sqe_number;
+                    arr->sq_number = *sqe_number;
                     return;
                 }
         }
@@ -476,7 +478,7 @@ void init_params(char *file_name) {
             }
         }
     }
-    client_server_params.smp_msg_arr_size = (network_params.bandwidth / (8 * (MAX_PAYLOAD_SIZE + MAX_TOPIC_SIZE)) *network_params.typical_rtt/1000);
+    client_server_params.smp_msg_arr_size = network_params.bandwidth / (8 * (MAX_PAYLOAD_SIZE + MAX_TOPIC_SIZE) *network_params.typical_rtt/1000);
     client_server_params.window_size = network_params.bandwidth / (8 * (MAX_PAYLOAD_SIZE + MAX_TOPIC_SIZE));
 
 }
@@ -486,7 +488,8 @@ void * client_sender_routine(void* arg)
 {
     int s_len=sizeof(servaddr);
     int c_len=sizeof(cliaddr);
-    int sequence_number=(-1);
+    int * sequence_number= malloc(sizeof(int));
+    *sequence_number=(-1);
     int sqe_sender_arr[2];
     struct sm_msg_arr  * arr= malloc(sizeof(struct sm_msg_arr)*client_server_params.window_size);
    // for(int i;i<client_server_params.window_size;i++)
@@ -496,9 +499,8 @@ void * client_sender_routine(void* arg)
 
     while(1)
     {
-        sequence_number_select(&sequence_number,client_server_params.window_size,TIME_TO_WAIT);
-        message_encapsulation(&(arr[sequence_number]), client_server_params.smp_msg_arr_size, sequence_number,sqe_sender_arr);
-
+        sequence_number_select(sequence_number,client_server_params.window_size,TIME_TO_WAIT);
+        message_encapsulation(&(arr[*sequence_number]), client_server_params.smp_msg_arr_size, sequence_number,sqe_sender_arr);
         //gettimeofday(arg, 0);
 
 
@@ -506,16 +508,19 @@ void * client_sender_routine(void* arg)
         {
             if(sqe_sender_arr[i]!=(-1))
             {
-                pthread_mutex_lock(&lock);
-                sendto(client_socket, &arr[sqe_sender_arr[i]], sizeof(struct sm_msg_arr), MSG_CONFIRM,(const struct sockaddr *) &servaddr, s_len);
-                windowcontrol[sqe_sender_arr[i]].status = 1;
-                windowcontrol[sqe_sender_arr[i]].seq_num=sequence_number;
-                if(gettimeofday(&(windowcontrol[sqe_sender_arr[i]].t), 0)==-1)
+                if (arr[sqe_sender_arr[i]].arr_size > 0)
                 {
-                    perror("getimeofday");
-                }
-                pthread_mutex_unlock(&lock);
+                    pthread_mutex_lock(&lock);
+                    printf("message with sqr_number %d sent\n",arr[sqe_sender_arr[i]].sq_number);
+                    sendto(client_socket, &arr[sqe_sender_arr[i]], sizeof(struct sm_msg_arr), MSG_CONFIRM,(const struct sockaddr *) &servaddr, s_len);
 
+                    windowcontrol[sqe_sender_arr[i]].status = 1;
+                    windowcontrol[sqe_sender_arr[i]].seq_num = arr[sqe_sender_arr[i]].sq_number;
+                    if (gettimeofday(&(windowcontrol[sqe_sender_arr[i]].t), 0) == -1) {
+                        perror("getimeofday");
+                        }
+                    pthread_mutex_unlock(&lock);
+            }
             }
         }
     }
@@ -625,8 +630,13 @@ void * server_receive_routine(struct sm_msg_arr  *arr)
             sendto(server_socket, &message->sq_number, sizeof(int), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
             pthread_mutex_lock(&server_lock);
             arr[message->sq_number].arr_size = message->arr_size;
-            arr[message->sq_number].sq_number-message->sq_number;
-            arr[message->sq_number].msg_arr=message
+            arr[message->sq_number].sq_number=message->sq_number;
+            for(int j=0;j<message->arr_size;j++)
+            {
+                strcpy(arr[message->sq_number].msg_arr[j].topic,message->msg_arr[j].topic);
+                strcpy(arr[message->sq_number].msg_arr[j].payload,message->msg_arr[j].payload);
+            }
+            //arr[message->sq_number].msg_arr=message->msg_arr;
             pthread_mutex_unlock(&server_lock);
         }
     }
@@ -635,30 +645,27 @@ void * server_mqtt_publish_routine(struct sm_msg_arr  *arr)
 {
     int i = 0;
 
-    while (i < client_server_params.window_size) {
-        while (1)
+    while (i < client_server_params.window_size)
         {
             pthread_mutex_lock(&server_lock);
-            if (arr[i]->arr_size > 0)
+            if (arr[i].arr_size > 0)
             {
-                printf("\n############################   %d   ####################################\n",arr[i]->sq_number);
-                printf("ACK on message seq %d was sent to client\n", arr[i]->sq_number);
-                for (int j = 0; j < arr[i]->arr_size; j++)
+                printf("\n############################   %d   ####################################\n",arr[i].sq_number);
+                printf("ACK on message seq %d was sent to client\n", arr[i].sq_number);
+                for (int j = 0; j < arr[i].arr_size; j++)
                 {
-                    printf("%s %s \n", arr[i]->msg_arr[j].topic, arr[i]->msg_arr[j].payload);
+                    printf("%s %s \n", arr[i].msg_arr[j].topic, arr[i].msg_arr[j].payload);
                     // mqtt_publish(&arr[i]->msg_arr[j]);
                 }
-
+                arr[i].arr_size=0;
                 pthread_mutex_unlock(&server_lock);
-                break;
+                i++;
             }
             else
             {
                 pthread_mutex_unlock(&server_lock);
                 usleep(TIME_TO_WAIT);
             }
-        }
-        i++;
         if (i == client_server_params.window_size)
             i = 0;
     }

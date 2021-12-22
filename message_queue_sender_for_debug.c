@@ -14,10 +14,10 @@ void main()
     //msg_rcv_init(&msqid,"msgq");
     int sqe_arr[2];
 
-   for( i=0;i<10;i++)
+   for( i=0;i<100;i++)
     {
        sprintf(payload,"%d",i);
-     //  sleep(0.01);
+       sleep(1);
         message_queue_send("topic",payload);
     }
   //  message_encapsulation(arr,200,0,sqe_arr);*/

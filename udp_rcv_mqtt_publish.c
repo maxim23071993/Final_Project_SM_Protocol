@@ -6,12 +6,16 @@
 
 int main()
 {
-    struct sm_msg_arr *arr = malloc(client_server_params.window_size* sizeof(struct sm_msg_arr));
     char file_name[100] = {"//home//max//Desktop//MQTT Subscribe+msg_que+udp_git//SMP_PARAMS.txt"};
 
     init_params(file_name);
     udp_init_server();
-
+    struct sm_msg_arr *arr = malloc(client_server_params.window_size* sizeof(struct sm_msg_arr));
+    for(int i=0;i<client_server_params.window_size;i++)
+    {
+        arr[i].sq_number=0;
+        arr[i].arr_size=0;
+    }
     pthread_t server_receiver_thread,server_mqtt_publish_thread;
 
     pthread_mutex_init(&server_lock, NULL);
