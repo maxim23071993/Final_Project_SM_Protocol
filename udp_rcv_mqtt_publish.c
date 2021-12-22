@@ -7,9 +7,9 @@
 int main()
 {
     char file_name[100] = {"//home//max//Desktop//MQTT Subscribe+msg_que+udp_git//SMP_PARAMS.txt"};
+    udp_init_server();
 
     init_params(file_name);
-    udp_init_server();
     struct sm_msg_arr *arr = malloc(client_server_params.window_size* sizeof(struct sm_msg_arr));
     for(int i=0;i<client_server_params.window_size;i++)
     {

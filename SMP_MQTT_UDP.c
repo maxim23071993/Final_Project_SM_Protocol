@@ -313,12 +313,12 @@ int NETWORK_PARAMS_INIT(){
             RTT = timedifference_msec(t0, t1);
             RTO =  RTT + 4*network_params.MIN_DEV;
             client_server_params.rtt=RTT;
-            client_server_params.rtt=RTO;
+            client_server_params.rto=RTO;
             printf("RTT was init to %f milliseconds.\n", RTT);
             printf("RTO was init to %f milliseconds.\n", RTO);
             printf("Sending params to server...\n");
             for(int i=0;i<network_params.NUM_OF_TRY;i++) {
-                sendto(client_socket, &client_server_params, sizeof(client_server_params), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
+                sendto(client_socket, &client_server_params, sizeof(struct smp_client_server_params), MSG_CONFIRM, (const struct sockaddr *) &servaddr,s_len);
                 //k = ACK_rcv();
                 k = recvfrom(client_socket, (char *)msg, sizeof(msg),SO_RCVTIMEO, (struct sockaddr *) &servaddr,&s_len);
                 if (k != -1){
@@ -344,7 +344,7 @@ void server_init_respond() {
     int n = -1, k = -1;
     char *RTT_ack = {"RTT_INIT_ACK"};
     char RTT_init_msg[20];
-    struct smp_client_server_params tmp;
+   // struct smp_client_server_params tmp;
 
     struct timeval tv;
     tv.tv_sec = 10;
@@ -359,16 +359,16 @@ void server_init_respond() {
                 printf("RTT_INIT msg receive from clint\n");
                 sendto(server_socket, (const char *) RTT_ack, sizeof(RTT_ack), MSG_CONFIRM,(const struct sockaddr *) &cliaddr, c_len);
                 printf("%s message sent to client.\n", RTT_ack);
-                k = recvfrom(server_socket, &tmp, sizeof(struct smp_client_server_params), MSG_WAITALL, (struct sockaddr *) &cliaddr,&c_len);
+                k = recvfrom(server_socket, &client_server_params, sizeof(struct smp_client_server_params), MSG_WAITALL, (struct sockaddr *) &cliaddr,&c_len);
                 if (k != -1) {
 
-                    printf("RTT_SERVER was init to %f msec\n", tmp.rtt);
-                    printf("RTO_SERVER was init to %f msec\n", tmp.rto);
-                    printf("Max encapsulated message size is %d\n", tmp.smp_msg_arr_size);
-                    printf("Client and server window was set to %d\n", tmp.window_size);
+                    printf("RTT_SERVER was init to %f msec\n", client_server_params.rtt);
+                    printf("RTO_SERVER was init to %f msec\n", client_server_params.rto);
+                    printf("Max encapsulated message size is %d\n", client_server_params.smp_msg_arr_size);
+                    printf("Client and server window was set to %d\n", client_server_params.window_size);
                 }
-                client_server_params.window_size=tmp.window_size;
-                client_server_params.smp_msg_arr_size=tmp.smp_msg_arr_size;
+                //client_server_params.window_size=tmp.window_size;
+                //client_server_params.smp_msg_arr_size=tmp.smp_msg_arr_size;
                 sendto(server_socket, (const char *) RTT_ack, sizeof(RTT_ack), MSG_CONFIRM,
                        (const struct sockaddr *) &cliaddr, c_len);
                 return;
@@ -472,15 +472,21 @@ void init_params(char *file_name) {
                         network_params.DELTA = atof(str);
                         break;
                     case 13:
-                        network_params.typical_rtt=atoi(str);
+                        network_params.typical_rtt = atoi(str);
+                    case 14:
+                        strcpy(network_params.server_or_client, str);
                 }
                 break;
             }
         }
     }
-    client_server_params.smp_msg_arr_size = network_params.bandwidth / (8 * (MAX_PAYLOAD_SIZE + MAX_TOPIC_SIZE) *network_params.typical_rtt/1000);
-    client_server_params.window_size = network_params.bandwidth / (8 * (MAX_PAYLOAD_SIZE + MAX_TOPIC_SIZE));
-
+    if(strcmp("Client",network_params.server_or_client)==0) {
+         if(network_params.bandwidth / (8 * (MAX_PAYLOAD_SIZE + MAX_TOPIC_SIZE) *network_params.typical_rtt/1000)<=MAX_NUM_OF_MESSAGE)
+             client_server_params.smp_msg_arr_size = network_params.bandwidth / (8 * (MAX_PAYLOAD_SIZE + MAX_TOPIC_SIZE) *network_params.typical_rtt/1000);
+         else
+             client_server_params.smp_msg_arr_size=MAX_NUM_OF_MESSAGE;
+         client_server_params.window_size = network_params.bandwidth / (8 * (MAX_PAYLOAD_SIZE + MAX_TOPIC_SIZE));
+    }
 }
 /*####################################################################################################################*/
 //Thread routine

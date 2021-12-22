@@ -3,7 +3,7 @@
 Plese start filling the parameter rhigt after ":" 
 
 a) Client port :8080
-b) Client ip :192.168.1.117
+b) Client ip :192.168.1.115
 c) Server port :8081
 d) Server ip :192.168.1.117
 e) Satelite line bandwidth :100000
