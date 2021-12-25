@@ -3,9 +3,9 @@
 Plese start filling the parameter rhigt after ":" 
 
 a) Client port :8080
-b) Client ip :192.168.1.117
+b) Client ip :192.168.1.114
 c) Server port :8081
-d) Server ip :192.168.1.117
+d) Server ip :192.168.1.115
 e) Satelite line bandwidth :100000
 f) Connection retransmission number :10
 g) First maximum timeout :1
@@ -16,6 +16,7 @@ k) Min_DEV :10
 l) Delta :0.05
 m) Typical satelitte link RTT :500
 n) Server or Client? :Client
+o) Average income MQTT messeges in second :148
 
 ##########################################################################
 ################### SMP parameters configuration file ####################

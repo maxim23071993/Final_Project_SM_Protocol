@@ -57,14 +57,15 @@ struct smp_network_params{
     float DELTA;
     int typical_rtt;
     char server_or_client[7];
+    int avg_mqtt_msg;
 };
 struct smp_network_params network_params;
 /*####################################################################################################################*/
 //message queue defines and global variables
 #define PERMS 0644
-#define MAX_PAYLOAD_SIZE 30
-#define MAX_TOPIC_SIZE 20
-#define MAX_NUM_OF_MESSAGE (3000/(MAX_TOPIC_SIZE+MAX_PAYLOAD_SIZE))
+#define MAX_PAYLOAD_SIZE 15
+#define MAX_TOPIC_SIZE 10
+#define MAX_NUM_OF_MESSAGE (1000/(MAX_TOPIC_SIZE+MAX_PAYLOAD_SIZE))
 #define SMP_SYSTEM_MESSAGE "SMP SYS MSG"
 
 int msqid_global;
@@ -73,7 +74,9 @@ pthread_mutex_t lock,server_lock;
 //UDP defines and global variables
 #define CLIENT_PORT 8080
 #define SERVER_PORT 8081
-#define TIME_TO_WAIT 100 // useconds
+#define TIME_TO_WAIT 1010 // useconds
+
+
 
 int client_socket;
 int server_socket;
@@ -104,6 +107,8 @@ struct smp_client_server_params{
 };
 struct smp_client_server_params client_server_params;
 struct window_control * windowcontrol;
+int TIME_TO_WAIT_FOR_MSG_ENC ; // useconds
+
 /*####################################################################################################################*/
 //MQTT functions
 int mqtt_publish(struct sm_msg *message);

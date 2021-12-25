@@ -169,7 +169,7 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int *sqe_num
                 (arr->arr_size)++;
                 msgctl(msqid_global, IPC_STAT, &buf);
                if(buf.msg_qnum==0){
-                    usleep(TIME_TO_WAIT);
+                    usleep(TIME_TO_WAIT_FOR_MSG_ENC);
                 }
                 msgctl(msqid_global, IPC_STAT, &buf);
                 if((arr->arr_size)==(data_arr_size) || buf.msg_qnum==0){
@@ -475,6 +475,9 @@ void init_params(char *file_name) {
                         network_params.typical_rtt = atoi(str);
                     case 14:
                         strcpy(network_params.server_or_client, str);
+                    case 15:
+                        network_params.avg_mqtt_msg=atoi( str);
+                        TIME_TO_WAIT_FOR_MSG_ENC =(1000000/network_params.avg_mqtt_msg);
                 }
                 break;
             }
