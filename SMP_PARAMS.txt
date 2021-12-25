@@ -3,9 +3,9 @@
 Plese start filling the parameter rhigt after ":" 
 
 a) Client port :8080
-b) Client ip :192.168.1.114
+b) Client ip :192.168.1.115
 c) Server port :8081
-d) Server ip :192.168.1.114
+d) Server ip :192.168.1.115
 e) Satelite line bandwidth :100000
 f) Connection retransmission number :10
 g) First maximum timeout :1

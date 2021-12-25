@@ -64,7 +64,7 @@ struct smp_network_params network_params;
 #define PERMS 0644
 #define MAX_PAYLOAD_SIZE 30
 #define MAX_TOPIC_SIZE 20
-#define MAX_NUM_OF_MESSAGE (400/(MAX_TOPIC_SIZE+MAX_PAYLOAD_SIZE))
+#define MAX_NUM_OF_MESSAGE (600/(MAX_TOPIC_SIZE+MAX_PAYLOAD_SIZE))
 #define SMP_SYSTEM_MESSAGE "SMP SYS MSG"
 
 int msqid_global;
@@ -74,7 +74,7 @@ pthread_mutex_t lock,server_lock;
 #define CLIENT_PORT 8080
 #define SERVER_PORT 8081
 #define TIME_TO_WAIT 100 // useconds
-#define TIME_TO_WAIT_MSG_ENC 100
+#define TIME_TO_WAIT_MSG_ENC 1000
 
 int client_socket;
 int server_socket;
