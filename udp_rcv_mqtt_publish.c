@@ -6,7 +6,7 @@
 
 int main()
 {
-    char file_name[100] = {"//home//max//Desktop//MQTT Subscribe+msg_que+udp_git//SMP_PARAMS.txt"};
+    char file_name[100] = {"//home//shlomi//Desktop//MQTT Subscribe+msg_que+udp_git//SMP_PARAMS.txt"};
     udp_init_server();
 
     init_params(file_name);

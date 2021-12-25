@@ -631,11 +631,11 @@ void * client_receive_routine(struct timeval t0) {
 //Server Thread routine
 void * server_receive_routine(struct sm_msg_arr  *arr)
 {
-    struct sm_msg_arr *message = malloc(sizeof(struct sm_msg_arr));
+    struct sm_msg_arr *message = malloc((client_server_params.smp_msg_arr_size+1)*sizeof(struct sm_msg)+2 *sizeof(int));
     int c_len = sizeof(cliaddr);
     while (1)
     {
-        if (recvfrom(server_socket, message, sizeof(struct sm_msg_arr), MSG_WAITALL, (struct sockaddr *) &cliaddr,&c_len) != -1)
+        if (recvfrom(server_socket, message, client_server_params.smp_msg_arr_size*sizeof(struct sm_msg)+2 *sizeof(int) , MSG_WAITALL, (struct sockaddr *) &cliaddr,&c_len) != -1)
         {
             sendto(server_socket, &message->sq_number, sizeof(int), MSG_CONFIRM, (const struct sockaddr *) &cliaddr,c_len);
             pthread_mutex_lock(&server_lock);
