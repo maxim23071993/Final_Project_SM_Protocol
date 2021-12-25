@@ -473,11 +473,14 @@ void init_params(char *file_name) {
                         break;
                     case 13:
                         network_params.typical_rtt = atoi(str);
+                        break;
                     case 14:
                         strcpy(network_params.server_or_client, str);
+                        break;
                     case 15:
                         network_params.avg_mqtt_msg=atoi( str);
                         TIME_TO_WAIT_FOR_MSG_ENC =(1000000/network_params.avg_mqtt_msg);
+                        break;
                 }
                 break;
             }

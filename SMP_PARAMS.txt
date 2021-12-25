@@ -16,7 +16,7 @@ k) Min_DEV :10
 l) Delta :0.05
 m) Typical satelitte link RTT :500
 n) Server or Client? :Client
-o) Average income MQTT messeges in second :148
+o) Average income MQTT messeges in second :500
 
 ##########################################################################
 ################### SMP parameters configuration file ####################
