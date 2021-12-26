@@ -150,7 +150,6 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int *sqe_num
     arr->arr_size=0;
     sqe_send_arr[0]=-1;
     sqe_send_arr[1]=-1;
-    //arr->sq_number = *sqe_number;
     while(1)
     {
         read_from_message_queue(&message,msqid_global);
@@ -158,8 +157,12 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int *sqe_num
         {
             case 0:
                 sqe_send_arr[0]=atoi(message.payload);
-                if(arr->arr_size==0)
+                if(arr->arr_size==0) {
                     (*sqe_number)--;
+                }
+                else {
+                    arr->sq_number = sqe_send_arr[1] = (*sqe_number);
+                }
                 return;
 
                 // operator doesn't match any case constant +, -, *, /
@@ -479,7 +482,7 @@ void init_params(char *file_name) {
                         break;
                     case 15:
                         network_params.avg_mqtt_msg=atoi( str);
-                        TIME_TO_WAIT_FOR_MSG_ENC =(1000000/network_params.avg_mqtt_msg);
+                        TIME_TO_WAIT_FOR_MSG_ENC =(1000000/network_params.avg_mqtt_msg)+100;
                         break;
                 }
                 break;
@@ -523,7 +526,7 @@ void * client_sender_routine(void* arg)
                 if (arr[sqe_sender_arr[i]].arr_size > 0)
                 {
                     pthread_mutex_lock(&lock);
-                  //  printf("message with sqr_number %d sent\n",arr[sqe_sender_arr[i]].sq_number);
+                   // printf("message with sqr_number %d sent\n",arr[sqe_sender_arr[i]].sq_number);
                     sendto(client_socket, &arr[sqe_sender_arr[i]], sizeof(struct sm_msg_arr), MSG_CONFIRM,(const struct sockaddr *) &servaddr, s_len);
 
                     windowcontrol[sqe_sender_arr[i]].status = 1;
@@ -545,7 +548,7 @@ void * client_sender_routine(void* arg)
 }
 void* client_win_control_routine(struct timeval t0) {
     float time_diff = 0;
-    char buf[10];
+    char buf[MAX_PAYLOAD_SIZE];
     struct timeval rt,res;
     int seq_loss=0;
     float tmp;
@@ -556,7 +559,8 @@ void* client_win_control_routine(struct timeval t0) {
                 perror("getimeofday");
             }
             pthread_mutex_lock(&lock);
-            if ((windowcontrol[i].status == 1) && (windowcontrol[i].seq_num != -1)) {
+            if ((windowcontrol[i].status == 1) && (windowcontrol[i].seq_num != (-1)))
+            {
                 timersub(&rt,&windowcontrol[i].t,&res);
                 time_diff=res.tv_sec*1000.f+res.tv_usec/1000.f;
               //  time_diff = timedifference_msec(windowcontrol[i].t, rt);
@@ -574,7 +578,7 @@ void* client_win_control_routine(struct timeval t0) {
                             windowcontrol[i].num_of_trys++;
                             sprintf(buf, "%d", windowcontrol[i].seq_num);
                             message_queue_send(buf, SMP_SYSTEM_MESSAGE);
-                            printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
+                          //  printf("DEBUG: SMP SYS MSG was sent to sender thread with seq number:%s\n", buf);
                             //printf("time_diff-RTO:%f\n",(100*(time_diff-RTO)/RTT));
 
                           //  Update_Net_Params(time_diff); // need to add new parameter for fast raising.

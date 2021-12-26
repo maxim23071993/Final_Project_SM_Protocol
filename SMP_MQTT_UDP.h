@@ -66,7 +66,7 @@ struct smp_network_params network_params;
 #define MAX_PAYLOAD_SIZE 15
 #define MAX_TOPIC_SIZE 10
 #define MAX_NUM_OF_MESSAGE (1000/(MAX_TOPIC_SIZE+MAX_PAYLOAD_SIZE))
-#define SMP_SYSTEM_MESSAGE "SMP SYS MSG"
+#define SMP_SYSTEM_MESSAGE "SYS MSG"
 
 int msqid_global;
 pthread_mutex_t lock,server_lock;
@@ -74,7 +74,7 @@ pthread_mutex_t lock,server_lock;
 //UDP defines and global variables
 #define CLIENT_PORT 8080
 #define SERVER_PORT 8081
-#define TIME_TO_WAIT 1010 // useconds
+#define TIME_TO_WAIT 1000 // useconds
 
 
 
