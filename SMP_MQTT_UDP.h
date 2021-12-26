@@ -75,7 +75,7 @@ pthread_mutex_t lock,server_lock,throughput_counters_lock;
 #define CLIENT_PORT 8080
 #define SERVER_PORT 8081
 #define TIME_TO_WAIT 1000 // useconds
-#define TIME_TO_WAIT_FOR_THROUPUT 5 //seconds
+#define TIME_TO_WAIT_FOR_THROUPUT 1 //seconds
 int TIME_TO_WAIT_FOR_MSG_ENC ; // useconds
 
 
@@ -135,14 +135,15 @@ void sequence_number_select(int * previous_sqe,int window_size,int time_to_wait_
 void init_params(char *file_name);
 float timedifference_msec(struct timeval x, struct timeval y);
 /*####################################################################################################################*/
+int messege_send_counter;
+int messege_resend_counter;
+void * throughput_calculation_routine();
+void throughput_print_to_file(int throughput,int retransmission);
+/*####################################################################################################################*/
 //Client Thread routine
 void * client_sender_routine();
 void * client_receive_routine();
 void* client_win_control_routine();
-int messege_send_counter;
-int messege_resend_counter;
-void * throughput_calculation_routine();
-
 //Server Thread routine
 void * server_receive_routine(struct sm_msg_arr  *arr);
 void * server_mqtt_publish_routine(struct sm_msg_arr  *arr);

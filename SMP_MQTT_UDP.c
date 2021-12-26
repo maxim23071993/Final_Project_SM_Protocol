@@ -573,8 +573,8 @@ void* client_win_control_routine(struct timeval t0) {
                         if (time_diff > RTO) {
                             Update_Net_Params(time_diff); // need to add new parameter for fast raising.
 
-                            printf("DEBUG: Time out occur on msg seq number: %d\n", windowcontrol[i].seq_num);
-                            printf("seq.num:%d,num_of_trys:%d ,Time diff:%f, RTO:%f, RTT:%f,DEV:%f\n",windowcontrol[i].seq_num, windowcontrol[i].num_of_trys, time_diff, RTO, RTT,DEV);
+                            printf("SYSTEM MESSAGE : Time out occurred on message number: %d , time difference: %f , RTO: %f , RTT: %f \n", windowcontrol[i].seq_num,time_diff,RTO, RTT);
+                          //  printf("time difference: %f, RTO:%f, RTT:%f,DEV:%f\n", time_diff, RTO, RTT,DEV);
                             windowcontrol[i].status = -1;
                            // windowcontrol[i].t.tv_sec = 0;
                           //  windowcontrol[i].t.tv_usec = 0;
@@ -591,9 +591,7 @@ void* client_win_control_routine(struct timeval t0) {
                             pthread_mutex_lock(&throughput_counters_lock);
                             messege_resend_counter++;
                             pthread_mutex_unlock(&throughput_counters_lock);
-
                         }
-
             }
             pthread_mutex_unlock(&lock);
         }
@@ -645,12 +643,14 @@ void * client_receive_routine(struct timeval t0) {
 void * throughput_calculation_routine()
 {
     int throuput=0;
+    int retransmission;
     int i=0;
     while(1)
     {
         sleep(1);
         pthread_mutex_lock(&throughput_counters_lock);
         throuput+=(messege_send_counter-messege_resend_counter)*sizeof(struct sm_msg_arr)*8;
+        retransmission=messege_resend_counter;
         messege_send_counter=0;
         messege_resend_counter=0;
         pthread_mutex_unlock(&throughput_counters_lock);
@@ -658,12 +658,34 @@ void * throughput_calculation_routine()
         if(i==TIME_TO_WAIT_FOR_THROUPUT)
         {
             printf("#################### throughput : %d [bps] ####################\n", throuput/TIME_TO_WAIT_FOR_THROUPUT);
+            throughput_print_to_file(throuput,retransmission);
             throuput=0;
             i = 0;
         }
     }
 }
+void throughput_print_to_file(int throughput,int retransmission)
+{
+    char throughput_str[20];
+    char retransmission_str[20];
+    FILE *throughput_file = fopen("//home//max//Desktop//MQTT Subscribe+msg_que+udp_git//cmake-build-debug//throughput_file", "a"); // write only
+    FILE *retransmission_file = fopen("//home//max//Desktop//MQTT Subscribe+msg_que+udp_git//cmake-build-debug//retransmission_file", "a"); // write only
 
+    if ( throughput_file == NULL)
+    {
+        printf("Error! Could not open file\n");
+        exit(-1); // must include stdlib.h
+    }
+
+    sprintf(throughput_str,"%d\n",throughput);
+    fputs(throughput_str, throughput_file); // write to file
+    sprintf(retransmission_str,"%d\n",retransmission);
+    fputs(retransmission_str, retransmission_file); // write to file
+
+
+    fclose(throughput_file);
+    fclose(retransmission_file);
+}
 //Server Thread routine
 void * server_receive_routine(struct sm_msg_arr  *arr)
 {
