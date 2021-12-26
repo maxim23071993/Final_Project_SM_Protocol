@@ -69,13 +69,14 @@ struct smp_network_params network_params;
 #define SMP_SYSTEM_MESSAGE "SYS MSG"
 
 int msqid_global;
-pthread_mutex_t lock,server_lock;
+pthread_mutex_t lock,server_lock,throughput_counters_lock;
 /*####################################################################################################################*/
 //UDP defines and global variables
 #define CLIENT_PORT 8080
 #define SERVER_PORT 8081
 #define TIME_TO_WAIT 1000 // useconds
-
+#define TIME_TO_WAIT_FOR_THROUPUT 5 //seconds
+int TIME_TO_WAIT_FOR_MSG_ENC ; // useconds
 
 
 int client_socket;
@@ -107,7 +108,6 @@ struct smp_client_server_params{
 };
 struct smp_client_server_params client_server_params;
 struct window_control * windowcontrol;
-int TIME_TO_WAIT_FOR_MSG_ENC ; // useconds
 
 /*####################################################################################################################*/
 //MQTT functions
@@ -139,6 +139,10 @@ float timedifference_msec(struct timeval x, struct timeval y);
 void * client_sender_routine();
 void * client_receive_routine();
 void* client_win_control_routine();
+int messege_send_counter;
+int messege_resend_counter;
+void * throughput_calculation_routine();
+
 //Server Thread routine
 void * server_receive_routine(struct sm_msg_arr  *arr);
 void * server_mqtt_publish_routine(struct sm_msg_arr  *arr);

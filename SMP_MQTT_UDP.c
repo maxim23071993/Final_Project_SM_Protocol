@@ -529,6 +529,10 @@ void * client_sender_routine(void* arg)
                    // printf("message with sqr_number %d sent\n",arr[sqe_sender_arr[i]].sq_number);
                     sendto(client_socket, &arr[sqe_sender_arr[i]], sizeof(struct sm_msg_arr), MSG_CONFIRM,(const struct sockaddr *) &servaddr, s_len);
 
+                    pthread_mutex_lock(&throughput_counters_lock);
+                    messege_send_counter++;
+                    pthread_mutex_unlock(&throughput_counters_lock);
+
                     windowcontrol[sqe_sender_arr[i]].status = 1;
                     windowcontrol[sqe_sender_arr[i]].seq_num = arr[sqe_sender_arr[i]].sq_number;
                     if (gettimeofday(&(windowcontrol[sqe_sender_arr[i]].t), 0) == -1) {
@@ -584,6 +588,9 @@ void* client_win_control_routine(struct timeval t0) {
                           //  Update_Net_Params(time_diff); // need to add new parameter for fast raising.
                            // gettimeofday(&b,0);
                            // printf("net param time:%f\n", timedifference_msec(a,b));
+                            pthread_mutex_lock(&throughput_counters_lock);
+                            messege_resend_counter++;
+                            pthread_mutex_unlock(&throughput_counters_lock);
 
                         }
 
@@ -635,6 +642,28 @@ void * client_receive_routine(struct timeval t0) {
 
    }
 }
+void * throughput_calculation_routine()
+{
+    int throuput=0;
+    int i=0;
+    while(1)
+    {
+        sleep(1);
+        pthread_mutex_lock(&throughput_counters_lock);
+        throuput+=(messege_send_counter-messege_resend_counter)*sizeof(struct sm_msg_arr)*8;
+        messege_send_counter=0;
+        messege_resend_counter=0;
+        pthread_mutex_unlock(&throughput_counters_lock);
+        i++;
+        if(i==TIME_TO_WAIT_FOR_THROUPUT)
+        {
+            printf("#################### throughput : %d [bps] ####################\n", throuput/TIME_TO_WAIT_FOR_THROUPUT);
+            throuput=0;
+            i = 0;
+        }
+    }
+}
+
 //Server Thread routine
 void * server_receive_routine(struct sm_msg_arr  *arr)
 {
@@ -687,5 +716,4 @@ void * server_mqtt_publish_routine(struct sm_msg_arr  *arr)
             i = 0;
     }
 }
-
 /*####################################################################################################################*/
