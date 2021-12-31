@@ -20,7 +20,7 @@ int mqtt_publish(struct sm_msg *message)
     }
 
     conn_opts.keepAliveInterval = 20;
-    conn_opts.cleansession = 1;
+    conn_opts.cleansession = 0;
     if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS)
     {
         printf("Failed to connect, return code %d\n", rc);
@@ -37,7 +37,7 @@ int mqtt_publish(struct sm_msg *message)
         exit(EXIT_FAILURE);
     }
 
-    printf("Waiting for up to %d seconds for publication of %s\n"
+    /*printf("Waiting for up to %d seconds for publication of %s\n"
            "on topic %s for client with ClientID: %s\n",
            (int)(TIMEOUT/1000), PAYLOAD, TOPIC, CLIENTID);
     rc = MQTTClient_waitForCompletion(client, token, TIMEOUT);
@@ -46,7 +46,7 @@ int mqtt_publish(struct sm_msg *message)
     if ((rc = MQTTClient_disconnect(client, 10000)) != MQTTCLIENT_SUCCESS)
         printf("Failed to disconnect, return code %d\n", rc);
     MQTTClient_destroy(&client);
-    return rc;
+    return rc;*/
 }
 void delivered(void *context, MQTTClient_deliveryToken dt)
 {
@@ -171,9 +171,10 @@ void message_encapsulation(struct sm_msg_arr *arr,int data_arr_size,int *sqe_num
                 strcpy(arr->msg_arr[arr->arr_size].topic,message.topic);
                 (arr->arr_size)++;
                 msgctl(msqid_global, IPC_STAT, &buf);
-               if(buf.msg_qnum==0){
+               if(buf.msg_qnum==0)
+               {
                     usleep(TIME_TO_WAIT_FOR_MSG_ENC);
-                }
+               }
                 msgctl(msqid_global, IPC_STAT, &buf);
                 if((arr->arr_size)==(data_arr_size) || buf.msg_qnum==0){
                     sqe_send_arr[1]=*sqe_number;
@@ -705,12 +706,37 @@ void * server_receive_routine(struct sm_msg_arr  *arr)
                 strcpy(arr[message->sq_number].msg_arr[j].payload,message->msg_arr[j].payload);
             }
             //arr[message->sq_number].msg_arr=message->msg_arr;
-            pthread_mutex_unlock(&server_lock);
+            pthread_mutex_unlock(&server_lock); 
         }
     }
 }
 void * server_mqtt_publish_routine(struct sm_msg_arr  *arr)
 {
+    MQTTClient client;
+    MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
+    MQTTClient_message pubmsg = MQTTClient_message_initializer;
+    MQTTClient_deliveryToken token;
+    int rc;
+
+    if ((rc = MQTTClient_create(&client, ADDRESS, CLIENTID,
+                                MQTTCLIENT_PERSISTENCE_NONE, NULL)) != MQTTCLIENT_SUCCESS)
+    {
+        printf("Failed to create client, return code %d\n", rc);
+        exit(EXIT_FAILURE);
+    }
+
+    conn_opts.keepAliveInterval = 20;
+    conn_opts.cleansession = 0;
+    if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS)
+    {
+        printf("Failed to connect, return code %d\n", rc);
+        exit(EXIT_FAILURE);
+    }
+
+    pubmsg.payloadlen = MAX_PAYLOAD_SIZE;
+    pubmsg.qos = QOS;
+    pubmsg.retained = 0;
+
     int i = 0;
 
     while (i < client_server_params.window_size)
@@ -723,7 +749,13 @@ void * server_mqtt_publish_routine(struct sm_msg_arr  *arr)
                 for (int j = 0; j < arr[i].arr_size; j++)
                 {
                     printf("%s %s \n", arr[i].msg_arr[j].topic, arr[i].msg_arr[j].payload);
-                    // mqtt_publish(&arr[i]->msg_arr[j]);
+                    pubmsg.payload = arr[i].msg_arr[j].payload;
+
+                    if ((rc = MQTTClient_publishMessage(client, arr[i].msg_arr[j].topic, &pubmsg, &token)) != MQTTCLIENT_SUCCESS)
+                    {
+                        printf("Failed to publish message, return code %d\n", rc);
+                        exit(EXIT_FAILURE);
+                    }
                 }
                 arr[i].arr_size=0;
                 pthread_mutex_unlock(&server_lock);

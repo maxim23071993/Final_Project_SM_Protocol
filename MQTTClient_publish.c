@@ -46,7 +46,7 @@ int main()
         printf("Failed to publish message, return code %d\n", rc);
         exit(EXIT_FAILURE);
     }
-        usleep(2000);
+        usleep(7000);
 
     }
     printf("Waiting for up to %d seconds for publication of %s\n"

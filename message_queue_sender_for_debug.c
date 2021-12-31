@@ -18,7 +18,7 @@ void main()
     {
        sprintf(payload,"%d",i);
        usleep(2000);
-        message_queue_send("topic",payload);
+        message_queue_send(payload,"topic");
     }
   //  message_encapsulation(arr,200,0,sqe_arr);*/
    // init_params((file_name));
