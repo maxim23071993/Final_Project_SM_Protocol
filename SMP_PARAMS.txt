@@ -3,10 +3,10 @@
 Plese start filling the parameter rhigt after ":" 
 
 a) Client port :8080
-b) Client ip :192.168.1.120
+b) Client ip :192.168.1.109
 c) Server port :8081
-d) Server ip :192.168.1.120
-e) Satelite line bandwidth :100000
+d) Server ip :192.168.1.111
+e) Satelite line bandwidth :1000000
 f) Connection retransmission number :10
 g) First maximum timeout :1
 h) Max allowed RTT :1500
@@ -14,7 +14,7 @@ i) Alpha :0.0125
 j) Beta :0.25
 k) Min_DEV :10
 l) Delta :0.05
-m) Typical satelitte link RTT :500
+m) Typical satelitte link RTT :10000
 n) Server or Client? :Client
 o) Average income MQTT messeges in second :500
 

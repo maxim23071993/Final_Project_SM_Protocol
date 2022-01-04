@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="SMP"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="MQTT_PUBLISH2">
+				<Option output="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug/MQTT_PUBLISH2" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 MQTT_PUBLISH2"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="MQTT_PUBLISH2/fast">
+				<Option output="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug/MQTT_PUBLISH2" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 MQTT_PUBLISH2/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="MQTTClient_publish">
+				<Option output="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug/MQTTClient_publish" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 MQTTClient_publish"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="MQTTClient_publish/fast">
+				<Option output="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug/MQTTClient_publish" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 MQTTClient_publish/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="mqtt_subscribe_msg_que_send">
+				<Option output="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug/mqtt_subscribe_msg_que_send" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 mqtt_subscribe_msg_que_send"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="mqtt_subscribe_msg_que_send/fast">
+				<Option output="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug/mqtt_subscribe_msg_que_send" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 mqtt_subscribe_msg_que_send/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="message_queue_sender_for_debug">
+				<Option output="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug/message_queue_sender_for_debug" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 message_queue_sender_for_debug"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="message_queue_sender_for_debug/fast">
+				<Option output="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug/message_queue_sender_for_debug" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 message_queue_sender_for_debug/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="udp_rcv_mqtt_publish">
+				<Option output="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug/udp_rcv_mqtt_publish" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 udp_rcv_mqtt_publish"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="udp_rcv_mqtt_publish/fast">
+				<Option output="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug/udp_rcv_mqtt_publish" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 udp_rcv_mqtt_publish/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="msg_rcv_que_udp_send">
+				<Option output="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug/msg_rcv_que_udp_send" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 msg_rcv_que_udp_send"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="msg_rcv_que_udp_send/fast">
+				<Option output="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug/msg_rcv_que_udp_send" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 msg_rcv_que_udp_send/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="udp_client_for_debug">
+				<Option output="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug/udp_client_for_debug" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 udp_client_for_debug"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="udp_client_for_debug/fast">
+				<Option output="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug/udp_client_for_debug" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/9"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
+					<Add directory="/usr/include/c++/9/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 udp_client_for_debug/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/max/Desktop/MQTT\ Subscribe+msg_que+udp_git/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/MQTTClient_publish.c">
+			<Option target="MQTTClient_publish"/>
+		</Unit>
+		<Unit filename="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/MQTT_PUBLISH2.c">
+			<Option target="MQTT_PUBLISH2"/>
+		</Unit>
+		<Unit filename="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/SMP_MQTT_UDP.c">
+			<Option target="MQTT_PUBLISH2"/>
+			<Option target="MQTTClient_publish"/>
+			<Option target="mqtt_subscribe_msg_que_send"/>
+			<Option target="message_queue_sender_for_debug"/>
+			<Option target="udp_rcv_mqtt_publish"/>
+			<Option target="msg_rcv_que_udp_send"/>
+			<Option target="udp_client_for_debug"/>
+		</Unit>
+		<Unit filename="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/SMP_MQTT_UDP.h">
+			<Option target="MQTT_PUBLISH2"/>
+			<Option target="MQTTClient_publish"/>
+			<Option target="mqtt_subscribe_msg_que_send"/>
+			<Option target="message_queue_sender_for_debug"/>
+			<Option target="udp_rcv_mqtt_publish"/>
+			<Option target="msg_rcv_que_udp_send"/>
+			<Option target="udp_client_for_debug"/>
+		</Unit>
+		<Unit filename="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/message_queue_sender_for_debug.c">
+			<Option target="message_queue_sender_for_debug"/>
+		</Unit>
+		<Unit filename="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/mqtt_subscribe_msg_que_send.c">
+			<Option target="mqtt_subscribe_msg_que_send"/>
+		</Unit>
+		<Unit filename="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/msg_rcv_que_udp_send.c">
+			<Option target="msg_rcv_que_udp_send"/>
+		</Unit>
+		<Unit filename="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/udp_client_for_debug.c">
+			<Option target="udp_client_for_debug"/>
+		</Unit>
+		<Unit filename="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/udp_rcv_mqtt_publish.c">
+			<Option target="udp_rcv_mqtt_publish"/>
+		</Unit>
+		<Unit filename="/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

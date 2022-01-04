@@ -27,6 +27,7 @@
 //MQTT defines and global variables
 #define ADDRESS     "tcp://localhost:1883"
 #define CLIENTID    "ExampleClientSub"
+#define CLIENTID2    "ExampleClientSub2"
 #define TOPIC       "#"
 #define PAYLOAD     "Hello World!"
 #define QOS         0
@@ -65,7 +66,7 @@ struct smp_network_params network_params;
 #define PERMS 0644
 #define MAX_PAYLOAD_SIZE 15
 #define MAX_TOPIC_SIZE 10
-#define MAX_NUM_OF_MESSAGE (1000/(MAX_TOPIC_SIZE+MAX_PAYLOAD_SIZE))
+#define MAX_NUM_OF_MESSAGE (10000/(MAX_TOPIC_SIZE+MAX_PAYLOAD_SIZE))
 #define SMP_SYSTEM_MESSAGE "SYS MSG"
 
 int msqid_global;

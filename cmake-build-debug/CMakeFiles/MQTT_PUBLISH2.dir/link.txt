@@ -1,0 +1,1 @@
+/usr/bin/cc -g CMakeFiles/MQTT_PUBLISH2.dir/MQTT_PUBLISH2.c.o CMakeFiles/MQTT_PUBLISH2.dir/SMP_MQTT_UDP.c.o -o MQTT_PUBLISH2  -lpaho-mqtt3c 

@@ -1,0 +1,114 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "SMP",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "MQTTClient_publish::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-MQTTClient_publish-Debug-5e1d5c7d37dcd9acf547.json",
+					"name" : "MQTTClient_publish",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "MQTT_PUBLISH2::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-MQTT_PUBLISH2-Debug-535737885a86d290bfab.json",
+					"name" : "MQTT_PUBLISH2",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "message_queue_sender_for_debug::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-message_queue_sender_for_debug-Debug-5d37e8d368df367bc26d.json",
+					"name" : "message_queue_sender_for_debug",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "mqtt_subscribe_msg_que_send::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mqtt_subscribe_msg_que_send-Debug-1f4c00744e2d8dea4891.json",
+					"name" : "mqtt_subscribe_msg_que_send",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "msg_rcv_que_udp_send::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-msg_rcv_que_udp_send-Debug-7c6be390ac079aafc9ee.json",
+					"name" : "msg_rcv_que_udp_send",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "udp_client_for_debug::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-udp_client_for_debug-Debug-4b35de0a55afd8b536ec.json",
+					"name" : "udp_client_for_debug",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "udp_rcv_mqtt_publish::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-udp_rcv_mqtt_publish-Debug-96fdbd80c25c2c82835c.json",
+					"name" : "udp_rcv_mqtt_publish",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/cmake-build-debug",
+		"source" : "/home/max/Desktop/MQTT Subscribe+msg_que+udp_git"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

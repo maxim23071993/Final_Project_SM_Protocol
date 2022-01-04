@@ -1,0 +1,58 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/MQTT_PUBLISH2.c
+SMP_MQTT_UDP.h
+/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/SMP_MQTT_UDP.h
+
+/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/SMP_MQTT_UDP.c
+SMP_MQTT_UDP.h
+/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/SMP_MQTT_UDP.h
+
+/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/SMP_MQTT_UDP.h
+sys/wait.h
+-
+stdio.h
+-
+unistd.h
+-
+stdlib.h
+-
+string.h
+-
+errno.h
+-
+sys/types.h
+-
+sys/ipc.h
+-
+sys/msg.h
+-
+unistd.h
+-
+string.h
+-
+sys/socket.h
+-
+netinet/in.h
+-
+pthread.h
+-
+time.h
+-
+sys/time.h
+-
+sys/select.h
+-
+arpa/inet.h
+-
+inttypes.h
+-
+MQTTClient.h
+/home/max/Desktop/MQTT Subscribe+msg_que+udp_git/MQTTClient.h
+

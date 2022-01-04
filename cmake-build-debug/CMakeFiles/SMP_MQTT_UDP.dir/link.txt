@@ -1,0 +1,1 @@
+/usr/bin/cc -g CMakeFiles/SMP_MQTT_UDP.dir/SMP_MQTT_UDP.c.o -o SMP_MQTT_UDP  -lpaho-mqtt3c 

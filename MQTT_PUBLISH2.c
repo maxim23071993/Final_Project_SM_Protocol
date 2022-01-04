@@ -1,3 +1,7 @@
+//
+// Created by max on 02/01/2022.
+//
+
 #include "SMP_MQTT_UDP.h"
 
 int main()
@@ -5,7 +9,7 @@ int main()
     float i=0;
     //int i=0;
     struct sm_msg message;
-    strcpy(message.topic,"test     ");
+    strcpy(message.topic,"test2    ");
 //    strcpy(message.topic,"test");
 
     MQTTClient client;
@@ -14,7 +18,7 @@ int main()
     MQTTClient_deliveryToken token;
     int rc;
 
-    if ((rc = MQTTClient_create(&client, ADDRESS, CLIENTID,MQTTCLIENT_PERSISTENCE_NONE, NULL)) != MQTTCLIENT_SUCCESS)
+    if ((rc = MQTTClient_create(&client, ADDRESS, CLIENTID2,MQTTCLIENT_PERSISTENCE_NONE, NULL)) != MQTTCLIENT_SUCCESS)
     {
         printf("Failed to create client, return code %d\n", rc);
         exit(EXIT_FAILURE);
@@ -41,11 +45,11 @@ int main()
         pubmsg.payloadlen = (int)strlen(message.payload);
         pubmsg.qos = QOS;
         pubmsg.retained = 0;
-    if ((rc = MQTTClient_publishMessage(client, (message.topic), &pubmsg, &token)) != MQTTCLIENT_SUCCESS)
-    {
-        printf("Failed to publish message, return code %d\n", rc);
-        exit(EXIT_FAILURE);
-    }
+        if ((rc = MQTTClient_publishMessage(client, (message.topic), &pubmsg, &token)) != MQTTCLIENT_SUCCESS)
+        {
+            printf("Failed to publish message, return code %d\n", rc);
+            exit(EXIT_FAILURE);
+        }
         usleep(10);
 
     }

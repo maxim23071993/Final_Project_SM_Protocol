@@ -17,7 +17,7 @@ void main()
    for( i=0;i<10000000000000000000;i++)
     {
        sprintf(payload,"%d",i);
-       usleep(2000);
+       usleep(10);
         message_queue_send(payload,"topic");
     }
   //  message_encapsulation(arr,200,0,sqe_arr);*/
